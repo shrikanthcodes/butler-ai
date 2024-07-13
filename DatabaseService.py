@@ -1,6 +1,7 @@
 from SQLService import SQLService
 import DatabaseConstants as dc
 
+
 class DatabaseService:
     def __init__(self):
         self.user_count = 0
@@ -20,9 +21,11 @@ class DatabaseService:
             user_id = self.user_count
 
         if conversation_id:
-            result = SQLService.execute_sql_statement(dc.chat_history_by_conversation_id_sql,(conversation_id,))
+            result = SQLService.execute_sql_statement(
+                dc.chat_history_by_conversation_id_sql, (conversation_id,))
         elif user_id:
-            result = SQLService.execute_sql_statement(dc.chat_history_by_user_id_sql,(user_id,))
+            result = SQLService.execute_sql_statement(
+                dc.chat_history_by_user_id_sql, (user_id,))
         else:
             return None
 
@@ -30,10 +33,11 @@ class DatabaseService:
         return chat_history
 
     def update_chat_history(self, conversation_id, new_message):
-        current_chat_history = self.get_chat_history(conversation_id=conversation_id)
+        current_chat_history = self.get_chat_history(
+            conversation_id=conversation_id)
         if current_chat_history is None:
             current_chat_history = ""
-        updated_chat_history = current_chat_history +";;"+new_message
+        updated_chat_history = current_chat_history + ";;"+new_message
 
         sql_statement = dc.update_chat_history_sql
         values = (updated_chat_history, conversation_id)
