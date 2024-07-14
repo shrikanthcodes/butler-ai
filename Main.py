@@ -1,7 +1,7 @@
 from DatabaseService import DatabaseService
 import ChatService
 from Formatting import convert_chat_to_string_print, convert_chat_to_list, convert_chat_to_string_print
-from SQLService import SQLService
+
 
 if __name__ == "__main__":
     user_id = 2

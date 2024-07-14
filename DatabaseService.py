@@ -14,6 +14,7 @@ class DatabaseService:
         self.db = SQLService(dc.butler_db, delete_db=False)
         self.chat_history = []
 
+    # TODO: Flexibility and error handling for creating already existing tables
     def create_tables(self):
         for table in Tables.values():
             self.db.create(table.name, Schemas.__dict__[
@@ -37,6 +38,7 @@ class DatabaseService:
             user_id, name))
         return user_id
 
+    # TODO: Error handling for already existing conversation
     def add_conversation(self, id=None, user_id=0, conversation_history=""):
         if id == None:
             conversation_id = self.counts["conversation"]
