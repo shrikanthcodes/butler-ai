@@ -1,13 +1,17 @@
 def convert_chat_to_string_print(chat):
     if isinstance(chat, list):
-        formatted_messages = '\n'.join([message for message in chat])
+        formatted_messages = '\n'.join(
+            [f"{message['role']}: {message['content']}" for message in chat])
     else:
         formatted_messages = chat
     print(formatted_messages)
 
 
 def convert_chat_to_string_store(chat):
-    return '\n'.join([f"{message['role']}::{message['content']}" for message in chat]).join(";;")
+    formatted_messages = ';;'.join(
+        [f"{message['role']}::{message['content']}" for message in chat])
+    print(formatted_messages)
+    return formatted_messages
 
 
 def format_message_to_JSON(role, content):

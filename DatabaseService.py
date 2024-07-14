@@ -23,23 +23,31 @@ class DatabaseService:
               "\n".join(Tables.keys()))
 
     # TODO: Error handling for already existing user
-    def add_user(self, name):
-        user_id = self.counts["user"]
+    def add_user(self, id=None, name="admin"):
+        if id == None:
+            user_id = self.counts["user"]
+            self.counts["user"] += 1
+            print("User ID: None and ", user_id)
+        else:
+            user_id = id
+            print("User ID: Not None and ", user_id)
         values = (user_id, name)
         self.db.insert(Tables["users"].name,
                        Tables["users"].columns, values)
-        self.counts["user"] += 1
         # Logging
         print("Added user_id: {} for user_name: {}".format(
             user_id, name))
         return user_id
 
-    def add_conversation(self, user_id=0, conversation_history=""):
-        conversation_id = self.counts["conversation"]
+    def add_conversation(self, id=None, user_id=0, conversation_history=""):
+        if id == None:
+            conversation_id = self.counts["conversation"]
+            self.counts["conversation"] += 1
+        else:
+            conversation_id = id
         values = (conversation_id, user_id, conversation_history)
         self.db.insert(Tables["conversations"].name,
                        Tables["conversations"].columns, values)
-        self.counts["conversation"] += 1
         # Logging
         print("Added conversation_id: {} for user id: {}".format(
             conversation_id, user_id))
@@ -88,7 +96,7 @@ class DatabaseService:
     def update_conversation(self, conversation_id, new_conversation):
         chat_history = self.get_conversation(
             conversation_id=conversation_id)
-        if chat_history is None:
+        if chat_history is "":
             updated_chat_history = new_conversation
         else:
             updated_chat_history = chat_history + ";;" + new_conversation
