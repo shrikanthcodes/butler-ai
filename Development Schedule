@@ -1,4 +1,12 @@
 1) SQLite3 vs other DBs
 2) Wrap up TODOs
-3) @Hithesh: Testing Modules
-4) @Shrikanth: Function calls to end conversation
+3) Persist DB with initial data
+4) @Hithesh: Testing Modules
+5) @Shrikanth: Function calls to stop AI misuse, end conversation, parse new items and recipes
+6) Collect Recipes and items list
+7) Finalize Schema
+8) Monitor costs/use Azure ChatGPT API if necessary
+9) (Possibly) cloud integration
+10) Authentication (login, register) with DB support
+11) AI safety settings
+12) Follow directory structure/organize files and ensure dependancies
