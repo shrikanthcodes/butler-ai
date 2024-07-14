@@ -1,5 +1,9 @@
 def convert_chat_to_string_print(chat):
-    return '\n'.join([f"{message['role']}: {message['content']}" for message in chat]).join(",")
+    if isinstance(chat, list):
+        formatted_messages = '\n'.join([message for message in chat])
+    else:
+        formatted_messages = chat
+    print(formatted_messages)
 
 
 def convert_chat_to_string_store(chat):
@@ -8,6 +12,8 @@ def convert_chat_to_string_store(chat):
 
 def format_message_to_JSON(role, content):
     return {"role": role, "content": content}
+
+# TODO: Error Handling for empty conversation_history string in convert_chat_to_list
 
 
 def convert_chat_to_list(chat_string):

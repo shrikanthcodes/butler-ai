@@ -4,37 +4,59 @@ import os
 
 
 class SQLService:
-  def __init__(self, db_file, delete_db=False):
-    if delete_db and os.path.exists(db_file):
-      os.remove(db_file)
-    self.conn = None
-    try:
-      self.conn = sqlite3.connect(db_file)
-      self.conn.execute("PRAGMA foreign_keys = 1")
-    except Error as e:
-      print(e)
+    def __init__(self, db, delete_db=False):
+        if delete_db and os.path.exists(db):
+            os.remove(db)
+        self.conn = None
+        try:
+            self.conn = sqlite3.connect(db)
+            self.conn.execute("PRAGMA foreign_keys = 1")
+        except Error as e:
+            print(e)
 
-  def create_table(self, create_table_sql, drop_table_name=None):
-    if drop_table_name:
-      try:
-        c = self.conn.cursor()
-        c.execute("""DROP TABLE IF EXISTS %s""" % (drop_table_name))
-      except Error as e:
-        print(e)
+    def create(self, table, schema, drop_table=False):
+        if drop_table:
+            try:
+                c = self.conn.cursor()
+                c.execute("DROP TABLE IF EXISTS ?", (table))
+            except Error as e:
+                print(e)
 
-    try:
-      c = self.conn.cursor()
-      c.execute(create_table_sql)
-    except Error as e:
-      print(e)
+        try:
+            c = self.conn.cursor()
+            c.execute(f"CREATE TABLE {table} ({schema});")
+        except Error as e:
+            print(e)
 
-  def execute_sql_statement(self, sql_statement):
-    cur = self.conn.cursor()
-    cur.execute(sql_statement)
-    rows = cur.fetchall()
-    return rows
+    # def query(self, sql, params=()):
+    #     cur = self.conn.cursor()
+    #     print(params)
+    #     cur.execute(sql, params)
+    #     rows = cur.fetchall()
+    #     return rows
 
-  def insert_rows(self, sql_statement, values):
-    cur = self.conn.cursor()
-    cur.execute(sql_statement, values)
-    return cur.lastrowid
+    def query(self, sql, params=()):
+        if not isinstance(params, tuple):
+            params = (params,)
+        cur = self.conn.cursor()
+        cur.execute(sql, params)
+        rows = cur.fetchall()
+        return rows
+
+    def insert(self, table, columns, values):
+        columns_str = ', '.join(columns)
+        placeholders = ', '.join(['?'] * len(values))
+        sql = f"""INSERT INTO {table}
+            ({columns_str}) VALUES ({placeholders})"""
+        cur = self.conn.cursor()
+        cur.execute(sql, values)
+        self.conn.commit()
+        return cur.lastrowid
+
+    def update(self, table, set_column, set_value, condition_column, condition_value):
+        sql = f"""UPDATE {table} SET {set_column}
+            = ? WHERE {condition_column} = ?"""
+        cur = self.conn.cursor()
+        cur.execute(sql, (set_value, condition_value))
+        self.conn.commit()
+        return cur.lastrowid
