@@ -18,7 +18,7 @@ class SQLService:
         if drop_table:
             try:
                 c = self.conn.cursor()
-                c.execute("DROP TABLE IF EXISTS ?", (table))
+                c.execute(f"DROP TABLE IF EXISTS {table}")
             except Error as e:
                 print(e)
 
@@ -27,13 +27,6 @@ class SQLService:
             c.execute(f"CREATE TABLE {table} ({schema});")
         except Error as e:
             print(e)
-
-    # def query(self, sql, params=()):
-    #     cur = self.conn.cursor()
-    #     print(params)
-    #     cur.execute(sql, params)
-    #     rows = cur.fetchall()
-    #     return rows
 
     def query(self, sql, params=()):
         if not isinstance(params, tuple):
@@ -46,16 +39,15 @@ class SQLService:
     def insert(self, table, columns, values):
         columns_str = ', '.join(columns)
         placeholders = ', '.join(['?'] * len(values))
-        sql = f"""INSERT INTO {table}
-            ({columns_str}) VALUES ({placeholders})"""
+        sql = f"INSERT INTO {table} ({columns_str}) VALUES ({placeholders})"
         cur = self.conn.cursor()
         cur.execute(sql, values)
         self.conn.commit()
         return cur.lastrowid
 
     def update(self, table, set_column, set_value, condition_column, condition_value):
-        sql = f"""UPDATE {table} SET {set_column}
-            = ? WHERE {condition_column} = ?"""
+        sql = f"""UPDATE {table} SET {
+            set_column} = ? WHERE {condition_column} = ?"""
         cur = self.conn.cursor()
         cur.execute(sql, (set_value, condition_value))
         self.conn.commit()

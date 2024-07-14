@@ -19,7 +19,7 @@ class DatabaseService:
             self.db.create(table.name, Schemas.__dict__[
                 table.name], drop_table=True)
         # Logging
-        print("The following tables were created successfully: " +
+        print("The following tables were created successfully:\n" +
               "\n".join(Tables.keys()))
 
     # TODO: Error handling for already existing user
@@ -27,15 +27,13 @@ class DatabaseService:
         if id == None:
             user_id = self.counts["user"]
             self.counts["user"] += 1
-            print("User ID: None and ", user_id)
         else:
             user_id = id
-            print("User ID: Not None and ", user_id)
         values = (user_id, name)
         self.db.insert(Tables["users"].name,
                        Tables["users"].columns, values)
         # Logging
-        print("Added user_id: {} for user_name: {}".format(
+        print("Added user_id: {}; user_name: {}".format(
             user_id, name))
         return user_id
 
@@ -96,7 +94,7 @@ class DatabaseService:
     def update_conversation(self, conversation_id, new_conversation):
         chat_history = self.get_conversation(
             conversation_id=conversation_id)
-        if chat_history is "":
+        if chat_history == "":
             updated_chat_history = new_conversation
         else:
             updated_chat_history = chat_history + ";;" + new_conversation
