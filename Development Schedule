@@ -1,8 +1,8 @@
 1) SQLite3 vs other DBs: Done
 2) Wrap up TODOs: Done
 3) Persist DB with initial data
-4) @Hithesh: Testing Modules
-5) @Shrikanth: Function calls to stop AI misuse, end conversation, parse new items and recipes
+4) @Hithesh: Testing Modules: test.db
+5) @Shrikanth: Function calls to stop AI misuse, end conversation, parse new items and recipes, register feedback/save it
 6) Collect Recipes and items list
 7) Finalize Schema
 8) Monitor costs/use Azure ChatGPT API if necessary

@@ -1,6 +1,6 @@
-from SQLService import SQLService
+from SQLService import SQLService, Error
 from Schemas import Schemas, Tables
-from Formatting import format_message_for_storage
+from Formatting import format_message_for_storage, convert_chat_to_list
 from errorHandling import ErrorHandler, logger
 
 
@@ -144,7 +144,8 @@ class DatabaseService:
             logger.error(error_message)
             raise ErrorHandler.EntityNotFoundError(error_message)
 
-        result = self.db.fetch_one(f"{entity_type}s", "id", entity_id)
+        result = self.db.fetch_one(f"{entity_type}s", f"{
+                                   entity_type}_id", entity_id)
 
         if not result:
             error_message = ErrorHandler.entity_not_found_error_message(
@@ -229,7 +230,8 @@ class DatabaseService:
 
         columns = ", ".join(f"{key} = ?" for key in kwargs.keys())
         values = list(kwargs.values()) + [entity_id]
-        query = f"UPDATE {entity_type}s SET {columns} WHERE id = ?"
+        query = f"UPDATE {entity_type}s SET {
+            columns} WHERE {entity_type}_id = ?"
         self.db.execute(query, values)
 
         logger.info(f"Updated {entity_type}_id: {
@@ -247,8 +249,8 @@ class DatabaseService:
         Returns:
             dict: The updated conversation data.
         """
-        chat_history = self.get_conversation(
-            conversation_id=conversation_id)["chat_history"]
+        chat_history = self.get_conversation_chat_history_by_id(
+            conversation_id=conversation_id)
         updated_chat_history = format_message_for_storage(
             chat_history, new_conversation)
         return self.update_entity("conversation", conversation_id, chat_history=updated_chat_history)
@@ -291,3 +293,60 @@ class DatabaseService:
             dict: The updated item data.
         """
         return self.update_entity("item", item_id, **kwargs)
+
+    def get_conversation_chat_history_by_id(self, conversation_id):
+        """
+        Fetch the chat history of a conversation from the database by conversation ID.
+
+        Args:
+            conversation_id (int): The ID of the conversation.
+
+        Returns:
+            list: The chat history as a list if found.
+
+        Raises:
+            ErrorHandler.EntityNotFoundError: If the conversation with the given ID is not found.
+        """
+        try:
+            query = "SELECT chat_history FROM conversations WHERE conversation_id = ?"
+            result = self.db.query(query, (conversation_id,))
+            if result:
+                # TODO: Find out what result looks like
+                chat_history = result[0][0]
+                return convert_chat_to_list(chat_history)
+            else:
+                error_message = ErrorHandler.entity_not_found_error_message(
+                    "conversation", conversation_id)
+        except Error as e:
+            ErrorHandler.log_and_raise(
+                ErrorHandler.DatabaseError, f"""Error fetching chat history
+                for conversation_id {conversation_id}: {e}""")
+
+    def get_conversation_chat_history_by_user_id(self, user_id):
+        """
+        Fetch the chat histories of all conversations from the database by user ID.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            list: A list of chat histories, each converted to list format.
+
+        Raises:
+            ErrorHandler.EntityNotFoundError: If no conversations are found for the given user ID.
+        """
+        try:
+            query = "SELECT chat_history FROM conversations WHERE user_id = ?"
+            results = self.db.query(query, (user_id,))
+            if results:
+                chat_histories = [convert_chat_to_list(
+                    chat_history[0]) for chat_history in results]
+                return chat_histories
+            else:
+                error_message = ErrorHandler.entity_not_found_error_message(
+                    "user", user_id)
+                ErrorHandler.log_and_raise(
+                    ErrorHandler.EntityNotFoundError, error_message)
+        except Error as e:
+            ErrorHandler.log_and_raise(
+                ErrorHandler.DatabaseError, f"Error fetching chat histories for user_id {user_id}: {e}")

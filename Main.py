@@ -4,14 +4,12 @@ from Formatting import convert_chat_to_string_print, convert_chat_to_list, conve
 
 
 if __name__ == "__main__":
-    user_id = 2
-    conversation_id = 2
     user_name = "admin"
     db = DatabaseService()
     db.create_tables()
-    user_id = db.add_user(user_id, user_name)
-    conversation_id = db.add_conversation(conversation_id, user_id, "")
-    ChatService.complete_chat(db, conversation_id, [])
+    user_id = db.add_user(user_name)
+    conversation_id = db.add_conversation(user_id)
+    ChatService.complete_chat(db, conversation_id)
     print("\nCompleted Chat Transcript:\n")
     convert_chat_to_string_print(convert_chat_to_list(
-        db.get_conversation(conversation_id)))
+        db.get_conversation_chat_history_by_id(conversation_id)))

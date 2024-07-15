@@ -21,6 +21,8 @@ def format_message_to_JSON(role, content):
 
 
 def convert_chat_to_list(chat_string):
+    if chat_string == "":
+        return []
     chat_list = [message.split("::") for message in chat_string.split(";;")]
     return [format_message_to_JSON(message[0], message[1]) for message in chat_list]
 
