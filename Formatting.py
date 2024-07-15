@@ -23,3 +23,11 @@ def format_message_to_JSON(role, content):
 def convert_chat_to_list(chat_string):
     chat_list = [message.split("::") for message in chat_string.split(";;")]
     return [format_message_to_JSON(message[0], message[1]) for message in chat_list]
+
+
+def format_message_for_storage(old_chat, new_chat):
+    if old_chat == "":
+        chat = new_chat
+    else:
+        chat = old_chat + ";;" + new_chat
+    return chat

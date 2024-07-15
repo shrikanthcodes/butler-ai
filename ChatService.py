@@ -4,7 +4,8 @@ import Formatting
 import LLMConstants as lc
 
 
-def complete_chat(db, conversation_id, conversation=[]):
+def complete_chat(db, conversation_id):
+
     # conversation = Formatting.convert_chat_to_list(conversation_str)
     current_conversation = []
     client = OpenAI(api_key=OPENAI_API_KEY)
@@ -35,8 +36,6 @@ def complete_chat(db, conversation_id, conversation=[]):
         current_conversation)
     db.update_conversation(
         conversation_id, current_conversation_string)
-
-    # return Formatting.convert_chat_to_string_print(current_conversation)
 
 
 def goal_reached(message):
