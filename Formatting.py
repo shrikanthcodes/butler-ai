@@ -4,13 +4,19 @@ def convert_chat_to_string_print(chat):
             [f"{message['role']}: {message['content']}" for message in chat])
     else:
         formatted_messages = chat
-    print(formatted_messages)
+    return formatted_messages
+
+
+def convert_chat_store_to_string_print(chat_str):
+    if chat_str == "":
+        return ""
+    pretty_print = chat_str.replace(";;", "\n").replace("::", ": ")
+    return "\n\n" + pretty_print
 
 
 def convert_chat_to_string_store(chat):
     formatted_messages = ';;'.join(
         [f"{message['role']}::{message['content']}" for message in chat])
-    print(formatted_messages)
     return formatted_messages
 
 

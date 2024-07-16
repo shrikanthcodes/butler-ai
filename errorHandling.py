@@ -1,7 +1,7 @@
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -47,11 +47,10 @@ class ErrorHandler:
     @staticmethod
     def log_and_raise(error, message):
         """
-        Log an error message and raise a custom exception.
+        Raises a custom exception.
 
         Args:
             error (Exception): The exception to raise.
             message (str): The error message to log and raise.
         """
-        logger.error(message)
         raise error(message)

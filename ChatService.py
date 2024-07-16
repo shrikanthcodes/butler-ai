@@ -5,8 +5,8 @@ import LLMConstants as lc
 
 
 def complete_chat(db, conversation_id):
-    conversation_history = db.get_conversation_chat_history_by_id(
-        conversation_id)
+    conversation_history = Formatting.convert_chat_to_list(db.get_conversation_chat_history_by_id(
+        conversation_id))
     client = OpenAI(api_key=OPENAI_API_KEY)
     current_conversation = []
     current_conversation.append(

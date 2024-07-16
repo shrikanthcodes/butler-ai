@@ -30,8 +30,6 @@ class DatabaseService:
         for table in Tables.values():
             self.db.create(table.name, Schemas.__dict__[
                            table.name], drop_tables)
-        logger.info("The following tables were created successfully:\n" +
-                    "\n".join(Tables.keys()))
 
     def add_entity(self, entity_type, **kwargs):
         """
@@ -47,12 +45,10 @@ class DatabaseService:
         Returns:
             int: The ID of the added entity.
         """
-        columns = Tables[entity_type].columns[1:]  # Exclude the id column
+        table_name = f"{entity_type}s"
+        columns = Tables[table_name].columns[1:]  # Exclude the id column
         values = tuple(kwargs[col] for col in columns)
-        entity_id = self.db.insert(f"{entity_type}s", columns, values)
-
-        logger.info(f"Added {entity_type}_id: {
-                    entity_id} with values: {kwargs}")
+        entity_id = self.db.insert(table_name, columns, values)
         return entity_id
 
     def add_user(self, name=""):
@@ -71,22 +67,21 @@ class DatabaseService:
             logger.error(e)
             print(e)
 
-    def add_conversation(self, user_id=0, conversation_history=""):
+    def add_conversation(self, user_id=0, chat_history=""):
         """
         Add a conversation to the database.
 
         Args:
             user_id (int, optional): The ID of the user. Defaults to 0.
-            conversation_history (str, optional): The conversation history. Defaults to "".
+            chat_history (str, optional): The chat history. Defaults to "".
 
         Returns:
             int: The ID of the added conversation.
         """
         try:
-            return self.add_entity("conversation", user_id=user_id, conversation_history=conversation_history)
+            return self.add_entity("conversation", user_id=user_id, chat_history=chat_history)
         except ErrorHandler.EntityAlreadyExistsError as e:
             logger.error(e)
-            print(e)
 
     def add_recipe(self, name="", ingredients="", instructions=""):
         """
@@ -141,7 +136,6 @@ class DatabaseService:
         if entity_id is None:
             error_message = ErrorHandler.entity_not_found_error_message(
                 entity_type, entity_id)
-            logger.error(error_message)
             raise ErrorHandler.EntityNotFoundError(error_message)
 
         result = self.db.fetch_one(f"{entity_type}s", f"{
@@ -150,12 +144,9 @@ class DatabaseService:
         if not result:
             error_message = ErrorHandler.entity_not_found_error_message(
                 entity_type, entity_id)
-            logger.error(error_message)
             raise ErrorHandler.EntityNotFoundError(error_message)
 
         entity_data = result
-        logger.info(f"Fetched {entity_type}_id: {
-                    entity_id} with data: {entity_data}")
         return entity_data
 
     def get_conversation(self, conversation_id):
@@ -225,17 +216,14 @@ class DatabaseService:
         if not existing_entity:
             error_message = ErrorHandler.entity_not_found_error_message(
                 entity_type, entity_id)
-            logger.error(error_message)
             raise ErrorHandler.EntityNotFoundError(error_message)
 
         columns = ", ".join(f"{key} = ?" for key in kwargs.keys())
         values = list(kwargs.values()) + [entity_id]
         query = f"UPDATE {entity_type}s SET {
             columns} WHERE {entity_type}_id = ?"
-        self.db.execute(query, values)
+        self.db.query(query, values)
 
-        logger.info(f"Updated {entity_type}_id: {
-                    entity_id} with values: {kwargs}")
         return self.get_entity(entity_type, entity_id)
 
     def update_conversation(self, conversation_id, new_conversation):
@@ -302,7 +290,7 @@ class DatabaseService:
             conversation_id (int): The ID of the conversation.
 
         Returns:
-            list: The chat history as a list if found.
+            String: The chat history as a String if found.
 
         Raises:
             ErrorHandler.EntityNotFoundError: If the conversation with the given ID is not found.
@@ -311,9 +299,8 @@ class DatabaseService:
             query = "SELECT chat_history FROM conversations WHERE conversation_id = ?"
             result = self.db.query(query, (conversation_id,))
             if result:
-                # TODO: Find out what result looks like
                 chat_history = result[0][0]
-                return convert_chat_to_list(chat_history)
+                return chat_history
             else:
                 error_message = ErrorHandler.entity_not_found_error_message(
                     "conversation", conversation_id)

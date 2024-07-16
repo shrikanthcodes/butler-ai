@@ -45,7 +45,6 @@ class SQLService:
                     self.conn.execute(f"DROP TABLE IF EXISTS {table}")
                 self.conn.execute(f"CREATE TABLE IF NOT EXISTS {
                                   table} ({schema});")
-                logger.info(f"Table '{table}' created successfully.")
         except Error as e:
             ErrorHandler.log_and_raise(
                 ErrorHandler.DatabaseError, f"Error creating table '{table}': {e}")
@@ -114,8 +113,6 @@ class SQLService:
                 cur = self.conn.cursor()
                 cur.execute(sql, values)
                 self.conn.commit()
-                logger.info(f"Inserted row into '{
-                            table}' with values: {values}")
                 return cur.lastrowid
         except Error as e:
             ErrorHandler.log_and_raise(
@@ -142,8 +139,6 @@ class SQLService:
                 cur = self.conn.cursor()
                 cur.execute(sql, (set_value, condition_value))
                 self.conn.commit()
-                logger.info(f"Updated row in '{table}' where {condition_column} = {
-                            condition_value} with {set_column} = {set_value}")
                 return cur.rowcount
         except Error as e:
             ErrorHandler.log_and_raise(
