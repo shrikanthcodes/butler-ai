@@ -1,7 +1,6 @@
 butler_db = "butler.db"
 
-get_conversation_by_id = """SELECT chat_history FROM conversations 
-    WHERE conversation_id = ?"""
 
-get_conversation_by_user_id = """SELECT chat_history FROM conversations 
-    WHERE user_id = ?"""
+def get_entity_by_id(entity_type, entity_id):
+    query = f"SELECT * FROM {entity_type}s WHERE id = ?"
+    return query, (entity_id,)

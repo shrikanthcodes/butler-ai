@@ -1,109 +1,339 @@
-from SQLService import SQLService
-import DatabaseConstants as dc
+from SQLService import SQLService, Error
 from Schemas import Schemas, Tables
-from Formatting import convert_chat_to_list
+from Formatting import format_message_for_storage, convert_chat_to_list
+from errorHandling import ErrorHandler, logger
 
 
 class DatabaseService:
-    def __init__(self):
-        # TODO: Logic for user_count, user_id, conversation_count, conversation_id must be improved
-        self.counts = {"user": 0,
-                       "conversation": 0,
-                       "recipe": 0,
-                       "item": 0}
-        self.db = SQLService(dc.butler_db, delete_db=False)
-        self.chat_history = []
+    """
+    A service class for managing database interactions.
 
-    # TODO: Flexibility and error handling for creating already existing tables
-    def create_tables(self):
+    Attributes:
+        db (SQLService): The database service instance.
+    """
+
+    def __init__(self):
+        """
+        Initialize the DatabaseService.
+
+        Initializes the database service.
+        """
+        self.db = SQLService("butler.db", delete_db=False)
+
+    def create_tables(self, drop_tables=False):
+        """
+        Create database tables.
+
+        Args:
+            drop_tables (bool): If True, drop existing tables before creating new ones.
+        """
         for table in Tables.values():
             self.db.create(table.name, Schemas.__dict__[
-                table.name], drop_table=True)
-        # Logging
-        print("The following tables were created successfully:\n" +
-              "\n".join(Tables.keys()))
+                           table.name], drop_tables)
 
-    # TODO: Error handling for already existing user
-    def add_user(self, id=None, name="admin"):
-        if id == None:
-            user_id = self.counts["user"]
-            self.counts["user"] += 1
-        else:
-            user_id = id
-        values = (user_id, name)
-        self.db.insert(Tables["users"].name,
-                       Tables["users"].columns, values)
-        # Logging
-        print("Added user_id: {}; user_name: {}".format(
-            user_id, name))
-        return user_id
+    def add_entity(self, entity_type, **kwargs):
+        """
+        Add an entity to the database.
 
-    # TODO: Error handling for already existing conversation
-    def add_conversation(self, id=None, user_id=0, conversation_history=""):
-        if id == None:
-            conversation_id = self.counts["conversation"]
-            self.counts["conversation"] += 1
-        else:
-            conversation_id = id
-        values = (conversation_id, user_id, conversation_history)
-        self.db.insert(Tables["conversations"].name,
-                       Tables["conversations"].columns, values)
-        # Logging
-        print("Added conversation_id: {} for user id: {}".format(
-            conversation_id, user_id))
-        return conversation_id
+        Args:
+            entity_type (str): The type of entity (e.g., user, conversation, recipe, item).
+            **kwargs: Additional attributes for the entity.
 
-    def add_recipe(self, name, ingredients="", instructions=""):
-        recipe_id = self.counts["recipe"]
-        values = (recipe_id, name, ingredients, instructions)
-        self.db.insert(Tables["recipes"].name,
-                       Tables["recipes"].columns, values)
-        self.counts["recipe"] += 1
-        # Logging
-        print("Added recipe_id: {} for recipe_name: {}".format(
-            recipe_id, name))
-        return recipe_id
+        Raises:
+            ErrorHandler.EntityAlreadyExistsError: If the entity with the given ID already exists.
 
-    def add_items(self, name, category="", calories=0):
-        item_id = self.counts["item"]
-        values = (item_id, name, category, calories)
-        self.db.insert(Tables["items"].name,
-                       Tables["items"].columns, values)
-        self.counts["item"] += 1
-        # Logging
-        print("Added item_id: {} for item_name: {}".format(
-            item_id, name))
-        return item_id
+        Returns:
+            int: The ID of the added entity.
+        """
+        table_name = f"{entity_type}s"
+        columns = Tables[table_name].columns[1:]  # Exclude the id column
+        values = tuple(kwargs[col] for col in columns)
+        entity_id = self.db.insert(table_name, columns, values)
+        return entity_id
 
-    def get_conversation(self, conversation_id=None, user_id=None):
-        if conversation_id is None and user_id is None:
-            return "No conversation found. Need a valid conversation_id or user_id."
+    def add_user(self, name=""):
+        """
+        Add a user to the database.
 
-        if conversation_id:
-            result = self.db.query(
-                dc.get_conversation_by_id, (conversation_id,))
-        elif user_id:
-            result = self.db.query(dc.get_conversation_by_user_id, (user_id,))
+        Args:
+            name (str, optional): The name of the user. Defaults to "admin".
 
-        if result:
-            self.chat_history = [row[0]
-                                 for row in result] if user_id else result[0][0]
-        else:
-            return "No Conversation Found"
+        Returns:
+            int: The ID of the added user.
+        """
+        try:
+            return self.add_entity("user", name=name)
+        except ErrorHandler.EntityAlreadyExistsError as e:
+            logger.error(e)
+            print(e)
 
-        return self.chat_history
+    def add_conversation(self, user_id=0, chat_history=""):
+        """
+        Add a conversation to the database.
+
+        Args:
+            user_id (int, optional): The ID of the user. Defaults to 0.
+            chat_history (str, optional): The chat history. Defaults to "".
+
+        Returns:
+            int: The ID of the added conversation.
+        """
+        try:
+            return self.add_entity("conversation", user_id=user_id, chat_history=chat_history)
+        except ErrorHandler.EntityAlreadyExistsError as e:
+            logger.error(e)
+
+    def add_recipe(self, name="", ingredients="", instructions=""):
+        """
+        Add a recipe to the database.
+
+        Args:
+            name (str): The name of the recipe.
+            ingredients (str, optional): The ingredients of the recipe. Defaults to "".
+            instructions (str, optional): The instructions for the recipe. Defaults to "".
+
+        Returns:
+            int: The ID of the added recipe.
+        """
+        try:
+            return self.add_entity("recipe", name=name, ingredients=ingredients, instructions=instructions)
+        except ErrorHandler.EntityAlreadyExistsError as e:
+            logger.error(e)
+            print(e)
+
+    def add_items(self, name="", category="", calories=0):
+        """
+        Add an item to the database.
+
+        Args:
+            name (str): The name of the item.
+            category (str, optional): The category of the item. Defaults to "".
+            calories (int, optional): The calories of the item. Defaults to 0.
+
+        Returns:
+            int: The ID of the added item.
+        """
+        try:
+            return self.add_entity("item", name=name, category=category, calories=calories)
+        except ErrorHandler.EntityAlreadyExistsError as e:
+            logger.error(e)
+            print(e)
+
+    def get_entity(self, entity_type, entity_id):
+        """
+        Fetch an entity from the database.
+
+        Args:
+            entity_type (str): The type of entity (e.g., user, conversation, recipe, item).
+            entity_id (int): The ID of the entity.
+
+        Raises:
+            ErrorHandler.EntityNotFoundError: If the entity with the given ID is not found.
+
+        Returns:
+            dict: The entity data if found.
+        """
+        if entity_id is None:
+            error_message = ErrorHandler.entity_not_found_error_message(
+                entity_type, entity_id)
+            raise ErrorHandler.EntityNotFoundError(error_message)
+
+        result = self.db.fetch_one(f"{entity_type}s", f"{
+                                   entity_type}_id", entity_id)
+
+        if not result:
+            error_message = ErrorHandler.entity_not_found_error_message(
+                entity_type, entity_id)
+            raise ErrorHandler.EntityNotFoundError(error_message)
+
+        entity_data = result
+        return entity_data
+
+    def get_conversation(self, conversation_id):
+        """
+        Fetch a conversation from the database.
+
+        Args:
+            conversation_id (int): The ID of the conversation.
+
+        Returns:
+            dict: The conversation data if found.
+        """
+        return self.get_entity("conversation", conversation_id)
+
+    def get_user(self, user_id):
+        """
+        Fetch a user from the database.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            dict: The user data if found.
+        """
+        return self.get_entity("user", user_id)
+
+    def get_recipe(self, recipe_id):
+        """
+        Fetch a recipe from the database.
+
+        Args:
+            recipe_id (int): The ID of the recipe.
+
+        Returns:
+            dict: The recipe data if found.
+        """
+        return self.get_entity("recipe", recipe_id)
+
+    def get_item(self, item_id):
+        """
+        Fetch an item from the database.
+
+        Args:
+            item_id (int): The ID of the item.
+
+        Returns:
+            dict: The item data if found.
+        """
+        return self.get_entity("item", item_id)
+
+    def update_entity(self, entity_type, entity_id, **kwargs):
+        """
+        Update an entity in the database.
+
+        Args:
+            entity_type (str): The type of entity (e.g., user, conversation, recipe, item).
+            entity_id (int): The ID of the entity.
+            kwargs (dict): The updated entity data.
+
+        Raises:
+            ErrorHandler.EntityNotFoundError: If the entity with the given ID is not found.
+
+        Returns:
+            dict: The updated entity data.
+        """
+        existing_entity = self.get_entity(entity_type, entity_id)
+        if not existing_entity:
+            error_message = ErrorHandler.entity_not_found_error_message(
+                entity_type, entity_id)
+            raise ErrorHandler.EntityNotFoundError(error_message)
+
+        columns = ", ".join(f"{key} = ?" for key in kwargs.keys())
+        values = list(kwargs.values()) + [entity_id]
+        query = f"UPDATE {entity_type}s SET {
+            columns} WHERE {entity_type}_id = ?"
+        self.db.query(query, values)
+
+        return self.get_entity(entity_type, entity_id)
 
     def update_conversation(self, conversation_id, new_conversation):
-        chat_history = self.get_conversation(
-            conversation_id=conversation_id)
-        if chat_history == "":
-            updated_chat_history = new_conversation
-        else:
-            updated_chat_history = chat_history + ";;" + new_conversation
-        self.db.update(Tables["conversations"].name, "chat_history",
-                       updated_chat_history, "conversation_id", conversation_id)
-        # Logging
-        print("Updated conversation_id: {}".format(conversation_id))
-        return convert_chat_to_list(updated_chat_history)
+        """
+        Update a conversation in the database.
 
-    # TODO: Functions for get/update recipes, items and users must be added
+        Args:
+            conversation_id (int): The ID of the conversation.
+            new_conversation (str): The new conversation data to add.
+
+        Returns:
+            dict: The updated conversation data.
+        """
+        chat_history = self.get_conversation_chat_history_by_id(
+            conversation_id=conversation_id)
+        updated_chat_history = format_message_for_storage(
+            chat_history, new_conversation)
+        return self.update_entity("conversation", conversation_id, chat_history=updated_chat_history)
+
+    def update_user(self, user_id, **kwargs):
+        """
+        Update a user in the database.
+
+        Args:
+            user_id (int): The ID of the user.
+            kwargs (dict): The updated user data.
+
+        Returns:
+            dict: The updated user data.
+        """
+        return self.update_entity("user", user_id, **kwargs)
+
+    def update_recipe(self, recipe_id, **kwargs):
+        """
+        Update a recipe in the database.
+
+        Args:
+            recipe_id (int): The ID of the recipe.
+            kwargs (dict): The updated recipe data.
+
+        Returns:
+            dict: The updated recipe data.
+        """
+        return self.update_entity("recipe", recipe_id, **kwargs)
+
+    def update_item(self, item_id, **kwargs):
+        """
+        Update an item in the database.
+
+        Args:
+            item_id (int): The ID of the item.
+            kwargs (dict): The updated item data.
+
+        Returns:
+            dict: The updated item data.
+        """
+        return self.update_entity("item", item_id, **kwargs)
+
+    def get_conversation_chat_history_by_id(self, conversation_id):
+        """
+        Fetch the chat history of a conversation from the database by conversation ID.
+
+        Args:
+            conversation_id (int): The ID of the conversation.
+
+        Returns:
+            String: The chat history as a String if found.
+
+        Raises:
+            ErrorHandler.EntityNotFoundError: If the conversation with the given ID is not found.
+        """
+        try:
+            query = "SELECT chat_history FROM conversations WHERE conversation_id = ?"
+            result = self.db.query(query, (conversation_id,))
+            if result:
+                chat_history = result[0][0]
+                return chat_history
+            else:
+                error_message = ErrorHandler.entity_not_found_error_message(
+                    "conversation", conversation_id)
+        except Error as e:
+            ErrorHandler.log_and_raise(
+                ErrorHandler.DatabaseError, f"""Error fetching chat history
+                for conversation_id {conversation_id}: {e}""")
+
+    def get_conversation_chat_history_by_user_id(self, user_id):
+        """
+        Fetch the chat histories of all conversations from the database by user ID.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            list: A list of chat histories, each converted to list format.
+
+        Raises:
+            ErrorHandler.EntityNotFoundError: If no conversations are found for the given user ID.
+        """
+        try:
+            query = "SELECT chat_history FROM conversations WHERE user_id = ?"
+            results = self.db.query(query, (user_id,))
+            if results:
+                chat_histories = [convert_chat_to_list(
+                    chat_history[0]) for chat_history in results]
+                return chat_histories
+            else:
+                error_message = ErrorHandler.entity_not_found_error_message(
+                    "user", user_id)
+                ErrorHandler.log_and_raise(
+                    ErrorHandler.EntityNotFoundError, error_message)
+        except Error as e:
+            ErrorHandler.log_and_raise(
+                ErrorHandler.DatabaseError, f"Error fetching chat histories for user_id {user_id}: {e}")

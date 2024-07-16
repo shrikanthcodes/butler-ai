@@ -4,10 +4,11 @@ import Formatting
 import LLMConstants as lc
 
 
-def complete_chat(db, conversation_id, conversation=[]):
-    # conversation = Formatting.convert_chat_to_list(conversation_str)
-    current_conversation = []
+def complete_chat(db, conversation_id):
+    conversation_history = Formatting.convert_chat_to_list(db.get_conversation_chat_history_by_id(
+        conversation_id))
     client = OpenAI(api_key=OPENAI_API_KEY)
+    current_conversation = []
     current_conversation.append(
         Formatting.format_message_to_JSON(lc.roles[1], lc.initial_message))
 
@@ -17,7 +18,7 @@ def complete_chat(db, conversation_id, conversation=[]):
             {"role": lc.roles[0], "content": prompt_text})
         response = client.chat.completions.create(
             model=lc.model,
-            messages=conversation + current_conversation,
+            messages=conversation_history + current_conversation,
             temperature=0.7,
             n=1,
             stop=None,
@@ -35,8 +36,6 @@ def complete_chat(db, conversation_id, conversation=[]):
         current_conversation)
     db.update_conversation(
         conversation_id, current_conversation_string)
-
-    # return Formatting.convert_chat_to_string_print(current_conversation)
 
 
 def goal_reached(message):
