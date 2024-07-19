@@ -1,12 +1,28 @@
-1) SQLite3 vs other DBs: Done
-2) Wrap up TODOs: Done
-3) Persist DB with initial data
-4) @Hithesh: Testing Modules: test.db
-5) @Shrikanth: Function calls to stop AI misuse, end conversation, parse new items and recipes, register feedback/save it
-6) Collect Recipes and items list
-7) Finalize Schema
-8) Monitor costs/use Azure ChatGPT API if necessary
-9) (Possibly) cloud integration
-10) Authentication (login, register) with DB support
-11) AI safety settings
-12) Follow directory structure/organize files and ensure dependancies
+After July 18
+Top Priorities:
+1) Persist DB with initial data by collecting items list (Fork https://github.com/emjay2k/fooddata2sql)
+2) Testing Modules: test.db
+3) Follow directory structure/organize files into folders
+
+Medium Priority:
+1) Finalize Schema
+2) Authentication (login, register) with DB support
+
+Low Priority:
+1) Function calls to stop AI misuse, end conversation, parse new items and recipes, register feedback/save it
+2) Monitor costs/use Azure ChatGPT API if necessary
+3) (Possibly) cloud integration
+4) AI safety settings
+
+
+
+
+
+
+Before July 18:
+1) Initial Setup 
+2) ChatService, DatabaseService, SQLService
+3) Modularize code
+4) Compare SQLite3 vs other DBs
+5) Wrap up TODOs
+
