@@ -1,3 +1,6 @@
 Credentials.py
 /myenv
 *.pyc
+*.bat
+Makefile
+__pycache__

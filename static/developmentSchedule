@@ -7,9 +7,10 @@ Top Priorities:
 Medium Priority:
 1) Finalize Schema
 2) Authentication (login, register) with DB support
+3) Generate documentation
 
 Low Priority:
-1) Function calls to stop AI misuse, end conversation, parse new items and recipes, register feedback/save it
+1) Function calls to stop AI misuse, generate end conversation, parse new items and recipes, register feedback/save it, parse recipes as JSON (and template the generate recipe prompt for uniform structure)
 2) Monitor costs/use Azure ChatGPT API if necessary
 3) (Possibly) cloud integration
 4) AI safety settings
