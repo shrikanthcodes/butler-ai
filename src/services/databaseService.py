@@ -12,13 +12,13 @@ class DatabaseService:
         db (SQLConfig): The database service instance.
     """
 
-    def __init__(self):
+    def __init__(self, db_name):
         """
         Initialize the DatabaseService.
 
         Initializes the database service.
         """
-        self.db = SQLConfig("butler.db", delete_db=False)
+        self.db = SQLConfig(db_name, delete_db=False)
 
     def create_tables(self, drop_tables=False):
         """
