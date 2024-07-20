@@ -1,5 +1,4 @@
-Credentials.py
+src/constants/credentials.py
 /myenv
 *.pyc
 __pycache__
-.vscode
