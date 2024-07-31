@@ -82,12 +82,12 @@ class SQLConfig:
                 cur = self.conn.cursor()
                 cur.execute(sql, params)
                 rows = cur.fetchall()
-                logger.info(f"Query executed successfully: {
-                            sql} with params: {params}, returned: {rows}")
+                logger.info(f"""Query executed successfully: {
+                            sql} with params: {params}, returned: {rows}""")
                 return rows
         except Error as e:
-            ErrorHandler.log_and_raise(ErrorHandler.DatabaseError, f"Error executing query: {
-                                       sql} with params: {params} - {e}")
+            ErrorHandler.log_and_raise(ErrorHandler.DatabaseError, f"""Error executing query: {
+                                       sql} with params: {params} - {e}""")
             logger.error(f"""Error executing query: {
                          sql} with params: {params} - {e}""")
 
@@ -159,8 +159,8 @@ class SQLConfig:
         Returns:
             int: The number of rows affected.
         """
-        sql = f"UPDATE {table} SET {
-            set_column} = ? WHERE {condition_column} = ?"
+        sql = f"""UPDATE {table} SET {
+            set_column} = ? WHERE {condition_column} = ?"""
         try:
             with self.conn:
                 cur = self.conn.cursor()
@@ -190,5 +190,5 @@ class SQLConfig:
                 return last_id
         except Error as e:
             ErrorHandler.log_and_raise(
-                ErrorHandler.DatabaseError, f"Error getting last insert id: {e}")
+                ErrorHandler.DatabaseError, f"""Error getting last insert id: {e}""")
             logger.error(f"Error getting last insert id: {e}")
