@@ -1,7 +1,7 @@
-from config.sqlConfig import SQLConfig, Error
+from config.sql_config import SQLConfig, Error
 from config.schemas import Schemas, Tables
 from utils.formatting import ChatFormatter as cf
-from utils.errorHandling import ErrorHandler, logger
+from utils.error_handling import ErrorHandler, logger
 
 
 class DatabaseService:
