@@ -110,7 +110,7 @@ class ChatFormatter:
             return []
         chat_list = [message.split("::")
                      for message in chat_string.split(";;")]
-        return [ChatFormatter.format_message_to_JSON(message[0], message[1]) for message in chat_list]
+        return [ChatFormatter.format_message_to_JSON(message[0], message[1]) for message in chat_list if len(message) == 2]
 
     @staticmethod
     def format_message_for_storage(old_chat, new_chat):

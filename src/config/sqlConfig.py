@@ -39,6 +39,7 @@ class SQLConfig:
         try:
             self.conn = sqlite3.connect(db_path)
             self.conn.execute("PRAGMA foreign_keys = 1")
+            logger.info(f"Connected to database at {db_path}")
         except Error as e:
             ErrorHandler.log_and_raise(
                 ErrorHandler.DatabaseError, f"Error connecting to database: {e}")
@@ -58,9 +59,12 @@ class SQLConfig:
                     self.conn.execute(f"DROP TABLE IF EXISTS {table}")
                 self.conn.execute(f"CREATE TABLE IF NOT EXISTS {
                                   table} ({schema});")
+                logger.info(
+                    f"Table '{table}' created successfully with schema: {schema}")
         except Error as e:
             ErrorHandler.log_and_raise(
                 ErrorHandler.DatabaseError, f"Error creating table '{table}': {e}")
+            logger.error(f"Error creating table '{table}': {e}")
 
     def query(self, sql, params=()):
         """
@@ -78,10 +82,14 @@ class SQLConfig:
                 cur = self.conn.cursor()
                 cur.execute(sql, params)
                 rows = cur.fetchall()
+                logger.info(f"Query executed successfully: {
+                            sql} with params: {params}, returned: {rows}")
                 return rows
         except Error as e:
             ErrorHandler.log_and_raise(ErrorHandler.DatabaseError, f"Error executing query: {
                                        sql} with params: {params} - {e}")
+            logger.error(f"Error executing query: {
+                         sql} with params: {params} - {e}")
 
     def fetch_one(self, table, column, value):
         """
@@ -101,6 +109,8 @@ class SQLConfig:
                 cur = self.conn.cursor()
                 cur.execute(sql, (value,))
                 row = cur.fetchone()
+                logger.info(f"Fetched one row from table '{
+                            table}' where {column} = {value}: {row}")
                 return row
         except Error as e:
             ErrorHandler.log_and_raise(
@@ -126,10 +136,14 @@ class SQLConfig:
                 cur = self.conn.cursor()
                 cur.execute(sql, values)
                 self.conn.commit()
-                return cur.lastrowid
+                last_id = cur.lastrowid
+                logger.info(f"Inserted row into table '{table}': {
+                            values}, last insert id: {last_id}")
+                return last_id
         except Error as e:
             ErrorHandler.log_and_raise(
                 ErrorHandler.DatabaseError, f"Error inserting row into table '{table}': {e}")
+            logger.error(f"Error inserting row into table '{table}': {e}")
 
     def update(self, table, set_column, set_value, condition_column, condition_value):
         """
@@ -152,10 +166,14 @@ class SQLConfig:
                 cur = self.conn.cursor()
                 cur.execute(sql, (set_value, condition_value))
                 self.conn.commit()
-                return cur.rowcount
+                rowcount = cur.rowcount
+                logger.info(f"Updated table '{table}': set {set_column} = {set_value} where {
+                            condition_column} = {condition_value}, affected rows: {rowcount}")
+                return rowcount
         except Error as e:
             ErrorHandler.log_and_raise(
                 ErrorHandler.DatabaseError, f"Error updating row in table '{table}': {e}")
+            logger.error(f"Error updating row in table '{table}': {e}")
 
     def last_insert_id(self):
         """
@@ -166,7 +184,11 @@ class SQLConfig:
         """
         try:
             with self.conn:
-                return self.conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+                last_id = self.conn.execute(
+                    'SELECT last_insert_rowid()').fetchone()[0]
+                logger.info(f"Last insert id: {last_id}")
+                return last_id
         except Error as e:
             ErrorHandler.log_and_raise(
                 ErrorHandler.DatabaseError, f"Error getting last insert id: {e}")
+            logger.error(f"Error getting last insert id: {e}")

@@ -16,6 +16,10 @@ class ErrorHandler:
         """Exception raised for database errors."""
         pass
 
+    class EntityNotFoundError(Exception):
+        """Exception raised when an entity with the given ID is not found."""
+        pass
+
     @staticmethod
     def entity_exists_error_message(entity_type, entity_id):
         """
