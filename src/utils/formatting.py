@@ -1,4 +1,4 @@
-from utils.errorHandling import ErrorHandler
+from utils.error_handling import ErrorHandler
 
 
 class ChatFormatter:

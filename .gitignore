@@ -1,4 +1,4 @@
 src/constants/credentials.py
 /myenv
-*.pyc
 __pycache__
+directory_structure.*

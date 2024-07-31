@@ -1,5 +1,5 @@
-from services.databaseService import DatabaseService
-from services.chatService import ChatService
+from services.database_service import DatabaseService
+from services.chat_service import ChatService
 from utils.formatting import ChatFormatter as fmt
 
 

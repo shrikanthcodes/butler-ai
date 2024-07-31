@@ -2,8 +2,8 @@ from openai import OpenAI
 from constants.credentials import OPENAI_API_KEY
 from utils.formatting import ChatFormatter as cf
 from llm.functions import goal_reached
-import constants.llmConstants as lc
-from utils.errorHandling import ErrorHandler
+import constants.llm_constants as lc
+from utils.error_handling import ErrorHandler
 
 
 class ChatService:

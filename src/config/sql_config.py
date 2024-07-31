@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from sqlite3 import Error
-from utils.errorHandling import ErrorHandler, logger
+from utils.error_handling import ErrorHandler, logger
 
 
 class SQLConfig:
