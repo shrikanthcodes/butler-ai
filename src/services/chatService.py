@@ -41,6 +41,7 @@ class ChatService:
                 db.get_conversation_chat_history_by_id(conversation_id))
             current_conversation = [cf.format_message_to_JSON(
                 lc.roles[1], lc.initial_message)]
+            print("AI: " + lc.initial_message)
 
             while True:
                 prompt_text = input("Type Next Message: ")

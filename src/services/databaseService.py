@@ -12,13 +12,13 @@ class DatabaseService:
         db (SQLConfig): The database service instance.
     """
 
-    def __init__(self):
+    def __init__(self, db_name):
         """
         Initialize the DatabaseService.
 
         Initializes the database service.
         """
-        self.db = SQLConfig("butler.db", delete_db=False)
+        self.db = SQLConfig(db_name, delete_db=False)
 
     def create_tables(self, drop_tables=False):
         """
@@ -69,19 +69,32 @@ class DatabaseService:
 
     def add_conversation(self, user_id=0, chat_history=""):
         """
-        Add a conversation to the database.
+        Add or append a conversation to the database. If a conversation for the given user ID exists, append to it.
 
         Args:
             user_id (int, optional): The ID of the user. Defaults to 0.
             chat_history (str, optional): The chat history. Defaults to "".
 
         Returns:
-            int: The ID of the added conversation.
+            int: The ID of the added or updated conversation.
         """
-        try:
+        if not self.get_user(user_id):
+            raise ErrorHandler.EntityNotFoundError(
+                f"User ID {user_id} does not exist.")
+
+        existing_conversation = self.db.query(
+            "SELECT conversation_id, chat_history FROM conversations WHERE user_id = ?",
+            (user_id,)
+        )
+
+        if existing_conversation:
+            conversation_id = existing_conversation[0][0]
+            old_chat_history = existing_conversation[0][1]
+            new_chat_history = cf.format_message_for_storage(
+                old_chat_history, chat_history)
+            return self.update_conversation(conversation_id, new_chat_history)
+        else:
             return self.add_entity("conversation", user_id=user_id, chat_history=chat_history)
-        except ErrorHandler.EntityAlreadyExistsError as e:
-            logger.error(e)
 
     def add_recipe(self, name="", ingredients="", instructions=""):
         """
@@ -146,8 +159,7 @@ class DatabaseService:
                 entity_type, entity_id)
             raise ErrorHandler.EntityNotFoundError(error_message)
 
-        entity_data = result
-        return entity_data
+        return result
 
     def get_conversation(self, conversation_id):
         """
@@ -232,16 +244,12 @@ class DatabaseService:
 
         Args:
             conversation_id (int): The ID of the conversation.
-            new_conversation (str): The new conversation data to add.
+            new_conversation (str): The new conversation data to replace the existing one.
 
         Returns:
             dict: The updated conversation data.
         """
-        chat_history = self.get_conversation_chat_history_by_id(
-            conversation_id=conversation_id)
-        updated_chat_history = cf.format_message_for_storage(
-            chat_history, new_conversation)
-        return self.update_entity("conversation", conversation_id, chat_history=updated_chat_history)
+        return self.update_entity("conversation", conversation_id, chat_history=new_conversation)
 
     def update_user(self, user_id, **kwargs):
         """
@@ -290,7 +298,7 @@ class DatabaseService:
             conversation_id (int): The ID of the conversation.
 
         Returns:
-            String: The chat history as a String if found.
+            str: The chat history as a string if found.
 
         Raises:
             ErrorHandler.EntityNotFoundError: If the conversation with the given ID is not found.
@@ -304,10 +312,11 @@ class DatabaseService:
             else:
                 error_message = ErrorHandler.entity_not_found_error_message(
                     "conversation", conversation_id)
+                ErrorHandler.log_and_raise(
+                    ErrorHandler.EntityNotFoundError, error_message)
         except Error as e:
             ErrorHandler.log_and_raise(
-                ErrorHandler.DatabaseError, f"""Error fetching chat history
-                for conversation_id {conversation_id}: {e}""")
+                ErrorHandler.DatabaseError, f"Error fetching chat history for conversation_id {conversation_id}: {e}")
 
     def get_conversation_chat_history_by_user_id(self, user_id):
         """

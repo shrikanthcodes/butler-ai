@@ -1,6 +1,6 @@
 from services.databaseService import DatabaseService
 from services.chatService import ChatService
-import utils.formatting as fmt
+from utils.formatting import ChatFormatter as fmt
 
 
 class Routines:
@@ -11,10 +11,11 @@ class Routines:
         db (SQLService): The database service instance.
     """
 
-    def __init__(self):
+    def __init__(self, db_name):
         """Initialize a Routines instance.
         """
-        self.ds = DatabaseService()
+        self.db_name = db_name
+        self.ds = DatabaseService(self.db_name)
         self.cs = ChatService()
 
     def new_user_new_chat(self, user_name):
