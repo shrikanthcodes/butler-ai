@@ -57,8 +57,8 @@ class SQLConfig:
             with self.conn:
                 if drop_table:
                     self.conn.execute(f"DROP TABLE IF EXISTS {table}")
-                self.conn.execute(f"CREATE TABLE IF NOT EXISTS {
-                                  table} ({schema});")
+                self.conn.execute(f"""CREATE TABLE IF NOT EXISTS {
+                                  table} ({schema});""")
                 logger.info(
                     f"Table '{table}' created successfully with schema: {schema}")
         except Error as e:
@@ -88,8 +88,8 @@ class SQLConfig:
         except Error as e:
             ErrorHandler.log_and_raise(ErrorHandler.DatabaseError, f"Error executing query: {
                                        sql} with params: {params} - {e}")
-            logger.error(f"Error executing query: {
-                         sql} with params: {params} - {e}")
+            logger.error(f"""Error executing query: {
+                         sql} with params: {params} - {e}""")
 
     def fetch_one(self, table, column, value):
         """
@@ -109,8 +109,8 @@ class SQLConfig:
                 cur = self.conn.cursor()
                 cur.execute(sql, (value,))
                 row = cur.fetchone()
-                logger.info(f"Fetched one row from table '{
-                            table}' where {column} = {value}: {row}")
+                logger.info(f"""Fetched one row from table '{
+                            table}' where {column} = {value}: {row}""")
                 return row
         except Error as e:
             ErrorHandler.log_and_raise(
@@ -137,8 +137,8 @@ class SQLConfig:
                 cur.execute(sql, values)
                 self.conn.commit()
                 last_id = cur.lastrowid
-                logger.info(f"Inserted row into table '{table}': {
-                            values}, last insert id: {last_id}")
+                logger.info(f"""Inserted row into table '{table}': {
+                            values}, last insert id: {last_id}""")
                 return last_id
         except Error as e:
             ErrorHandler.log_and_raise(
@@ -167,8 +167,8 @@ class SQLConfig:
                 cur.execute(sql, (set_value, condition_value))
                 self.conn.commit()
                 rowcount = cur.rowcount
-                logger.info(f"Updated table '{table}': set {set_column} = {set_value} where {
-                            condition_column} = {condition_value}, affected rows: {rowcount}")
+                logger.info(f"""Updated table '{table}': set {set_column} = {set_value} where {
+                            condition_column} = {condition_value}, affected rows: {rowcount}""")
                 return rowcount
         except Error as e:
             ErrorHandler.log_and_raise(

@@ -151,8 +151,8 @@ class DatabaseService:
                 entity_type, entity_id)
             raise ErrorHandler.EntityNotFoundError(error_message)
 
-        result = self.db.fetch_one(f"{entity_type}s", f"{
-                                   entity_type}_id", entity_id)
+        result = self.db.fetch_one(f"""{entity_type}s""", f"""{
+                                   entity_type}_id""", entity_id)
 
         if not result:
             error_message = ErrorHandler.entity_not_found_error_message(
@@ -232,8 +232,8 @@ class DatabaseService:
 
         columns = ", ".join(f"{key} = ?" for key in kwargs.keys())
         values = list(kwargs.values()) + [entity_id]
-        query = f"UPDATE {entity_type}s SET {
-            columns} WHERE {entity_type}_id = ?"
+        query = f"""UPDATE {entity_type}s SET {
+            columns} WHERE {entity_type}_id = ?"""
         self.db.query(query, values)
 
         return self.get_entity(entity_type, entity_id)
