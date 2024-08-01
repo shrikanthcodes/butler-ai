@@ -11,9 +11,7 @@ Top Priorities:
     b) Encryption/Decryption for userid/password storage
     c) registration flow, butler.db direct integration for non-vital information
     d) login flow
-
     z) TODO: Auth0 token for entire session (Shrikanth) 
-
 
 3) Finalize Schema: {{Dependant on 1}}
 
