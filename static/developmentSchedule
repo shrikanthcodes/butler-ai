@@ -11,9 +11,7 @@ Top Priorities:
     b) Encryption/Decryption for userid/password storage
     c) registration flow, butler.db direct integration for non-vital information
     d) login flow
-
     z) TODO: Auth0 token for entire session (Shrikanth) 
-
 
 3) Finalize Schema: {{Dependant on 1}}
 
@@ -27,6 +25,7 @@ Medium Priority:
     d) Recipe Extraction/Item extraction
 2) Clean up Commits
 3) Log all previous and future work/progress on Clickup
+4) Improve README
 
 Low Priority:
 1) Function calls to stop AI misuse, generate end conversation, parse new items and recipes, register feedback/save it, parse recipes as JSON (and template the generate recipe prompt for uniform structure)
