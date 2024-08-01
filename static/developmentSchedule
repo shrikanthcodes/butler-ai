@@ -1,29 +1,48 @@
 After July 18
 Top Priorities:
-1) Persist DB with initial data by collecting items list (Fork https://github.com/emjay2k/fooddata2sql)
-2) Testing Modules: test.db
-3) Follow directory structure/organize files into folders
+1) Persist DB with initial data by collecting items list (Fork https://github.com/emjay2k/fooddata2sql) : Shrikanth
+    a) Download most recent data from usfda
+    b) Populate all relevant data in new DB with support for items, macros, etc as necessary
+    c) Integrate code with existing app 
+    d) Regenerate new DB from within butler (with modifications allowed for future pruning/finalization of schema)
 
-Medium Priority:
-1) Finalize Schema
-2) Authentication (login, register) with DB support
-3) Generate documentation
+2) Authentication (login, register) with DB support : Hithesh
+    a) Create a new DB for auth
+    b) Encryption/Decryption for userid/password storage
+    c) registration flow, butler.db direct integration for non-vital information
+    d) login flow
+
+    z) TODO: Auth0 token for entire session (Shrikanth) 
+
+
+3) Finalize Schema: {{Dependant on 1}}
+
+
+
+Medium Priority: 
+1) Templating Service:
+    a) Recipe standardization
+    b) Item extraction, profile extraction
+    c) User profiling (extraction)
+    d) Recipe Extraction/Item extraction
+2) Clean up Commits
+3) Log all previous and future work/progress on Clickup
 
 Low Priority:
 1) Function calls to stop AI misuse, generate end conversation, parse new items and recipes, register feedback/save it, parse recipes as JSON (and template the generate recipe prompt for uniform structure)
 2) Monitor costs/use Azure ChatGPT API if necessary
 3) (Possibly) cloud integration
 4) AI safety settings
+5) Make repo public
 
 
 
-
-
-
-Before July 18:
+Completed:
 1) Initial Setup 
 2) ChatService, DatabaseService, SQLService
 3) Modularize code
 4) Compare SQLite3 vs other DBs
 5) Wrap up TODOs
-
+6) Testing Modules: test.db
+7) Follow directory structure/organize files into folders
+8) Generate Initial documentation
