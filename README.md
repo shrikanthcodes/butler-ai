@@ -132,3 +132,6 @@ Feel free to customize this template further to fit your project's specific deta
 
 # Clickup
  https://app.clickup.com/9014370434/v/f/90142105578
+
+# Development Schedule
+https://docs.google.com/document/d/1PyFB1IWJU_IuHUAZ0rsWmbKSZbxsLp30_nqBUYXHcio/edit?usp=sharing

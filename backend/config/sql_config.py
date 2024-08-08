@@ -24,7 +24,7 @@ class SQLConfig:
 
         # Determine the project root directory dynamically
         project_root = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..'))
+            os.path.dirname(__file__), '..'))
         db_path = os.path.join(project_root, db_folder_name, db_name)
 
         # Ensure the database directory exists
