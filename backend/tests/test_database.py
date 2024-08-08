@@ -1,5 +1,5 @@
 import unittest
-from services.database_service import DatabaseService
+from services.database import DatabaseService
 from config.sql_config import SQLConfig
 from config.schemas import Tables
 import os

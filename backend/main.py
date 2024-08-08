@@ -12,3 +12,14 @@ if __name__ == "__main__":
 
     # Get and print the chat conversation
     run.get_chat_and_print(conversation_id)
+
+    # from fastapi import FastAPI
+    # from backend.api.routes import api_router
+
+    # app = FastAPI()
+
+    # app.include_router(api_router)
+
+    # if __name__ == "__main__":
+    #     import uvicorn
+    #     uvicorn.run(app, host="0.0.0.0", port=8000)
