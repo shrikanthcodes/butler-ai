@@ -1,7 +1,7 @@
 from openai import OpenAI
 from constants.credentials import OPENAI_API_KEY
 from utils.formatting import ChatFormatter as cf
-from llm.functions import goal_reached
+from ai.functions import goal_reached
 import constants.llm_constants as lc
 from utils.error_handling import ErrorHandler
 
