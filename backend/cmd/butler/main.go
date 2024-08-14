@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backend/internal/config"
+	config "backend/internal/config/database"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -18,51 +18,64 @@ func main() {
 }
 
 func run() error {
+	// Load environment variables from .env file
 	envPath := filepath.Join("internal", "constants", "db_credentials.env")
 	if err := godotenv.Load(envPath); err != nil {
 		return fmt.Errorf("error loading .env file: %w", err)
 	}
 
+	// Fetch database credentials from environment variables
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
-	secretKeyBase64 := os.Getenv("SECRET_KEY")
+	securityKeyBase64 := os.Getenv("SECURITY_KEY")
+	piiKeyBase64 := os.Getenv("PII_KEY")
 
-	if dbUser == "" || dbPass == "" || dbHost == "" || dbPort == "" || secretKeyBase64 == "" {
+	// Validate the required environment variables
+	if dbUser == "" || dbPass == "" || dbHost == "" || dbPort == "" || securityKeyBase64 == "" || piiKeyBase64 == "" {
 		return fmt.Errorf("missing required environment variables")
 	}
 
-	// Decode the base64-encoded secret key
-	secretKey, err := base64.StdEncoding.DecodeString(secretKeyBase64)
+	// Decode the base64-encoded security key (AES-256 for security encryption)
+	securityKey, err := base64.StdEncoding.DecodeString(securityKeyBase64)
 	if err != nil {
-		return fmt.Errorf("invalid base64-encoded secret key: %w", err)
+		return fmt.Errorf("invalid base64-encoded security key: %w", err)
 	}
 
-	// Validate the key length
-	if len(secretKey) != 16 && len(secretKey) != 24 && len(secretKey) != 32 {
-		return fmt.Errorf("invalid AES key size: %d bytes", len(secretKey))
+	// Validate security key length (32 bytes for AES-256)
+	if len(securityKey) != 32 {
+		return fmt.Errorf("invalid AES-256 key size: %d bytes", len(securityKey))
 	}
 
+	// Decode the base64-encoded PII key (AES-128 for PII encryption)
+	piiKey, err := base64.StdEncoding.DecodeString(piiKeyBase64)
+	if err != nil {
+		return fmt.Errorf("invalid base64-encoded PII key: %w", err)
+	}
+
+	// Validate PII key length (16 bytes for AES-128)
+	if len(piiKey) != 16 {
+		return fmt.Errorf("invalid AES-128 key size: %d bytes", len(piiKey))
+	}
+
+	// Construct the base DSN string
 	baseDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/", dbUser, dbPass, dbHost, dbPort)
 
+	// Define the database configurations
 	dbConfigs := map[string]string{
 		"auth_db":   baseDSN + "auth_db?parseTime=true",
 		"user_db":   baseDSN + "user_db?parseTime=true",
 		"butler_db": baseDSN + "butler_db?parseTime=true",
 	}
 
-	encryptedDBs := map[string]bool{
-		"auth_db":   true,
-		"user_db":   false,
-		"butler_db": false,
-	}
-
-	sqlConfig, err := config.NewSQLConfig(dbConfigs, encryptedDBs, secretKey)
+	// Initialize the SQL configuration with security and PII keys
+	sqlConfig, err := config.NewSQLConfig(dbConfigs, securityKey, piiKey)
 	if err != nil {
 		return fmt.Errorf("failed to initialize SQLConfig: %w", err)
 	}
 
+	// Load schemas and test databases
 	configLoader := config.NewConfigLoader(sqlConfig)
 	if err := configLoader.LoadSchemas(); err != nil {
 		return fmt.Errorf("failed to load schemas: %w", err)
