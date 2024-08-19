@@ -114,6 +114,8 @@ type RecipePreferences struct {
 	Budget_currency  string `json:"budget_currency"`
 	ShopPreference   bool   `json:"shop_preference"`
 	ItemAvailability string `json:"item_availability"`
+	TimeAvailable    string `json:"time_available"`
+	Innovative       bool   `json:"innovative"`
 }
 
 type CompleteUserData struct {
