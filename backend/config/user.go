@@ -108,11 +108,12 @@ type RecipeInstructions struct {
 
 // Create a struct for Serving sizes, budget, willingness to shop, etc (user's recipe preferences)
 type RecipePreferences struct {
-	UserID          string `json:"user_id"`
-	ServingSize     string `json:"serving_size"`
-	Budget          string `json:"budget"`
-	Budget_currency string `json:"budget_currency"`
-	ShopPreference  bool   `json:"shop_preference"`
+	UserID           string `json:"user_id"`
+	ServingSize      string `json:"serving_size"`
+	Budget           string `json:"budget"`
+	Budget_currency  string `json:"budget_currency"`
+	ShopPreference   bool   `json:"shop_preference"`
+	ItemAvailability string `json:"item_availability"`
 }
 
 type CompleteUserData struct {

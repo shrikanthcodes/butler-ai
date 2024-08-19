@@ -90,10 +90,11 @@ func GetUserInventory(userID string) config.Inventory {
 func GetUserRecipePreferences(userID string) config.RecipePreferences {
 	// Try to use userID to get user recipe preferences or Create fake data (test)
 	recipePreferences := config.RecipePreferences{
-		UserID:         "123",
-		ServingSize:    "2",
-		Budget:         "Medium",
-		ShopPreference: true,
+		UserID:           "123",
+		ServingSize:      "2",
+		Budget:           "Medium",
+		ShopPreference:   true,
+		ItemAvailability: "Very Common",
 	}
 	return recipePreferences
 }

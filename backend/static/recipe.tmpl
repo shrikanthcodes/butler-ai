@@ -29,12 +29,14 @@ Known items in user's pantry:
 {{ end }}
 {{ end }}
 
+{{ if .RecipePreferences.ShopPreference }}
+User is willing to shop for additional groceries.
 {{ if .RecipePreferences.Budget }}
 Budget: {{ .RecipePreferences.Budget }}
 {{ end }}
-
-{{ if .RecipePreferences.ShopPreference }}
-User is willing to shop for additional groceries.
+{{ if .RecipePreferences.ItemAvailability }}
+How common the items should be to buy: {{ .RecipePreferences.ItemAvailability }}
+{{ end }}
 {{ else }}
 User prefers to use existing pantry items only.
 {{ end }}
