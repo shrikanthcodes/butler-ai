@@ -1,7 +1,7 @@
 package main
 
 import (
-	chat "backend/services/chat"
+	chat "backend/internal/services/chat"
 )
 
 func main() {

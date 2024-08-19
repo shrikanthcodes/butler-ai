@@ -1,7 +1,7 @@
 package user
 
 import (
-	config "backend/config"
+	config "backend/internal/config"
 )
 
 func GetUserProfile(userID string) config.UserProfile {

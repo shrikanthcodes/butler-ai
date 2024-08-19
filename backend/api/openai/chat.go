@@ -1,7 +1,7 @@
 package openai
 
 import (
-	config "backend/config"
+	config "backend/internal/config"
 	secrets "backend/secrets"
 	"bytes"
 	"encoding/json"

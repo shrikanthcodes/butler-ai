@@ -2,7 +2,7 @@ package chat
 
 import (
 	openai "backend/api/openai"
-	config "backend/config"
+	config "backend/internal/config"
 	bufio "bufio"
 	fmt "fmt"
 	os "os"

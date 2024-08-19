@@ -1,9 +1,9 @@
 package chat
 
 import (
-	config "backend/config"
-	templates "backend/services/template"
-	user "backend/services/user"
+	config "backend/internal/config"
+	templates "backend/internal/services/template"
+	user "backend/internal/services/user"
 	fmt "fmt"
 )
 

@@ -1,13 +1,13 @@
 package templates
 
 import (
-	config "backend/config"
+	config "backend/internal/config"
 	"fmt"
 )
 
 func initializeTemplateService() *TemplateService {
 	// Initialize the template service
-	templateService, err := NewTemplateService("static/*.tmpl")
+	templateService, err := NewTemplateService("templates/*.tmpl")
 	if err != nil {
 		fmt.Printf("Error initializing template service: %v\n", err)
 		return nil
