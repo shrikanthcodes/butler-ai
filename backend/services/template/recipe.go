@@ -15,8 +15,8 @@ func initializeTemplateService() *TemplateService {
 	return templateService
 }
 
-// RenderRecipeTemplate renders the recipe template with the given data.
-func RenderRecipeTemplate(data config.RecipeData) (string, error) {
+// RenderRecipeTemplate renders the recipe template with the complete user data.
+func RenderRecipeTemplate(data config.CompleteUserData) (string, error) {
 	ts := initializeTemplateService()
 	result, err := ts.RenderTemplate("recipe", data)
 	if err != nil {

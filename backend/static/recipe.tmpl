@@ -1,17 +1,42 @@
 {{ define "recipe" }}
-Generate a recipe for the user {{ .Name }} according to their requirements and preferences.
+Generate a recipe for the user {{ .Profile.FirstName }} {{ .Profile.LastName }} according to their requirements and preferences.
 
-{{ if .Allergy }}
-Allergy details: {{ .Allergy }}
+{{ if .Health.Allergies }}
+Allergy details:
+{{ range .Health.Allergies }}
+- {{ .ItemName }}: {{ .Description }}
 {{ end }}
-{{ if .Preferences }}
-Preferences: {{ .Preferences }}
 {{ end }}
-{{ if .PantryItems }}
+
+{{ if .Preferences.DietaryRestrictions }}
+Dietary restrictions:
+{{ range .Preferences.DietaryRestrictions }}
+- {{ .ItemName }}: {{ .Description }}
+{{ end }}
+{{ end }}
+
+{{ if .Preferences.FavoriteRecipes }}
+Favorite recipes:
+{{ range .Preferences.FavoriteRecipes }}
+- {{ .ItemName }}: {{ .Description }}
+{{ end }}
+{{ end }}
+
+{{ if .Inventory.Items }}
 Known items in user's pantry:
-{{ range .PantryItems }}
+{{ range .Inventory.Items }}
 - {{ .ItemName }}: {{ .Quantity }} {{ .Unit }}
 {{ end }}
+{{ end }}
+
+{{ if .RecipePreferences.Budget }}
+Budget: {{ .RecipePreferences.Budget }}
+{{ end }}
+
+{{ if .RecipePreferences.ShopPreference }}
+User is willing to shop for additional groceries.
+{{ else }}
+User prefers to use existing pantry items only.
 {{ end }}
 
 Ask any qualifying questions about the user's requirements before generating a recipe.

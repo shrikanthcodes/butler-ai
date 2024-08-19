@@ -3,6 +3,7 @@ package chat
 import (
 	config "backend/config"
 	templates "backend/services/template"
+	user "backend/services/user"
 	fmt "fmt"
 )
 
@@ -11,26 +12,9 @@ func GetModel() string {
 	return config.DEFAULT_MODEL
 }
 
-// GetUserData retrieves user data based on the user ID
-func GetUserData(userID string) config.RecipeData {
-	pantryItems := []config.PantryItem{
-		{ItemName: "Tomatoes", Quantity: 5, Unit: "pieces"},
-		{ItemName: "Onions", Quantity: 3, Unit: "pieces"},
-		{ItemName: "Garlic", Quantity: 2, Unit: "cloves"},
-	}
-
-	data := config.RecipeData{
-		Name:        "Aishwarya",
-		Allergy:     "Peanuts",
-		Preferences: "Vegetarian",
-		PantryItems: pantryItems,
-	}
-	return data
-}
-
 // GetUserPrompt generates a user prompt based on the user's data
 func GetUserPrompt(userID string) string {
-	result, err := templates.RenderRecipeTemplate(GetUserData(userID))
+	result, err := templates.RenderRecipeTemplate(user.GetCompleteUserData(userID))
 	if err != nil {
 		fmt.Printf("Error rendering template: %v\n", err)
 		return ""

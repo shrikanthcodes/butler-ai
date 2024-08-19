@@ -7,10 +7,10 @@ import (
 )
 
 func OpenAI_Key() string {
-	envPath := filepath.Join("secrets", ".env")
+	envPath := filepath.Join("secrets", "secret.env")
 	err := LoadEnvFile(envPath)
 	if err != nil {
-		fmt.Printf("Error loading .env file from location: %v", envPath)
+		fmt.Printf("Error loading .env file")
 		fmt.Println("Error extracting API key")
 		return ""
 	}
