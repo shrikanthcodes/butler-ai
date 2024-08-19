@@ -1,12 +1,12 @@
 package user
 
 import (
-	config "backend/internal/config"
+	model "backend/internal/model"
 )
 
-func GetUserProfile(userID string) config.UserProfile {
+func GetUserProfile(userID string) model.UserProfile {
 	// Try to use userID to get user profile or Create fake data (test)
-	profile := config.UserProfile{
+	profile := model.UserProfile{
 		UserID:     "123",
 		FirstName:  "Aishwarya",
 		LastName:   "Srinivasan",
@@ -22,41 +22,41 @@ func GetUserProfile(userID string) config.UserProfile {
 	return profile
 }
 
-func GetUserHealth(userID string) config.Health {
+func GetUserHealth(userID string) model.Health {
 	// Try to use userID to get user health or Create fake data (test)
-	health := config.Health{
+	health := model.Health{
 		UserID: "123",
-		HealthConditions: []config.BasicInfo{
+		HealthConditions: []model.BasicInfo{
 			{ItemName: "Asthma", Description: "Mild case of asthma"},
 			{ItemName: "Diabetes", Description: "Type 1 diabetes, controlled with insulin"},
 		},
-		Medications: []config.BasicInfo{
+		Medications: []model.BasicInfo{
 			{ItemName: "Insulin", Description: "10 units before meals"},
 		},
-		Allergies: []config.BasicInfo{
+		Allergies: []model.BasicInfo{
 			{ItemName: "Peanuts", Description: "Mild allergy to peanuts, especially when eaten raw or at night"},
 		},
-		DietaryRestrictions: []config.BasicInfo{
+		DietaryRestrictions: []model.BasicInfo{
 			{ItemName: "Vegetarian", Description: "Vegetarian diet, no meat or fish. Eggs and dairy are okay"},
 		},
 	}
 	return health
 }
 
-func GetUserPreferences(userID string) config.Preferences {
+func GetUserPreferences(userID string) model.Preferences {
 	// Try to use userID to get user preferences or Create fake data (test)
-	preferences := config.Preferences{
+	preferences := model.Preferences{
 		UserID: "123",
-		FavoriteRecipes: []config.BasicInfo{
+		FavoriteRecipes: []model.BasicInfo{
 			{ItemName: "Pasta", Description: "All types of pasta, especially with tomato sauce"},
 		},
-		DislikedRecipes: []config.BasicInfo{
+		DislikedRecipes: []model.BasicInfo{
 			{ItemName: "Fish curry", Description: "Any type of fish, especially salmon"},
 		},
-		FavoriteItems: []config.BasicInfo{
+		FavoriteItems: []model.BasicInfo{
 			{ItemName: "Tomatoes", Description: "All types of tomatoes, especially cherry tomatoes"},
 		},
-		DislikedItems: []config.BasicInfo{
+		DislikedItems: []model.BasicInfo{
 			{ItemName: "Mushrooms", Description: "All types of mushrooms, especially shiitake"},
 		},
 		FavoriteCategories: []string{
@@ -67,18 +67,18 @@ func GetUserPreferences(userID string) config.Preferences {
 			"Chinese",
 			"Japanese",
 		},
-		DietaryRestrictions: []config.BasicInfo{
+		DietaryRestrictions: []model.BasicInfo{
 			{ItemName: "Vegetarian", Description: "No meat or fish. Eggs and dairy are okay"},
 		},
 	}
 	return preferences
 }
 
-func GetUserInventory(userID string) config.Inventory {
+func GetUserInventory(userID string) model.Inventory {
 	// Try to use userID to get user inventory or Create fake data (test)
-	inventory := config.Inventory{
+	inventory := model.Inventory{
 		UserID: "123",
-		Items: []config.PantryItem{
+		Items: []model.PantryItem{
 			{ItemName: "Tomatoes", Quantity: 5, Unit: "pieces"},
 			{ItemName: "Onions", Quantity: 3, Unit: "pieces"},
 			{ItemName: "Garlic", Quantity: 2, Unit: "cloves"},
@@ -87,9 +87,9 @@ func GetUserInventory(userID string) config.Inventory {
 	return inventory
 }
 
-func GetUserRecipePreferences(userID string) config.RecipePreferences {
+func GetUserRecipePreferences(userID string) model.RecipePreferences {
 	// Try to use userID to get user recipe preferences or Create fake data (test)
-	recipePreferences := config.RecipePreferences{
+	recipePreferences := model.RecipePreferences{
 		UserID:           "123",
 		ServingSize:      "2",
 		Budget:           "Medium",
@@ -100,14 +100,14 @@ func GetUserRecipePreferences(userID string) config.RecipePreferences {
 }
 
 // GetCompleteUserData aggregates all user-related data.
-func GetCompleteUserData(userID string) config.CompleteUserData {
+func GetCompleteUserData(userID string) model.CompleteUserData {
 	profile := GetUserProfile(userID)
 	health := GetUserHealth(userID)
 	preferences := GetUserPreferences(userID)
 	inventory := GetUserInventory(userID)
 	recipePreferences := GetUserRecipePreferences(userID)
 
-	return config.CompleteUserData{
+	return model.CompleteUserData{
 		Profile:           profile,
 		Health:            health,
 		Preferences:       preferences,

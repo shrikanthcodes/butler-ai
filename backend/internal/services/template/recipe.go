@@ -1,7 +1,7 @@
 package templates
 
 import (
-	config "backend/internal/config"
+	model "backend/internal/model"
 	"fmt"
 )
 
@@ -16,7 +16,7 @@ func initializeTemplateService() *TemplateService {
 }
 
 // RenderRecipeTemplate renders the recipe template with the complete user data.
-func RenderRecipeTemplate(data config.CompleteUserData) (string, error) {
+func RenderRecipeTemplate(data model.CompleteUserData) (string, error) {
 	ts := initializeTemplateService()
 	result, err := ts.RenderTemplate("recipe", data)
 	if err != nil {

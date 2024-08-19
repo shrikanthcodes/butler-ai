@@ -1,4 +1,4 @@
-package config
+package model
 
 type Dialogue struct {
 	Role    string `json:"role"`

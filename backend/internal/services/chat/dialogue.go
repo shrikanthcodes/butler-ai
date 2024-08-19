@@ -2,7 +2,7 @@ package chat
 
 import (
 	openai "backend/api/openai"
-	config "backend/internal/config"
+	model "backend/internal/model"
 	bufio "bufio"
 	fmt "fmt"
 	os "os"
@@ -13,7 +13,7 @@ func GetReader() *bufio.Reader {
 	return bufio.NewReader(os.Stdin)
 }
 
-func GetUserMessage(conversation []config.Dialogue, reader *bufio.Reader) (bool, []config.Dialogue) {
+func GetUserMessage(conversation []model.Dialogue, reader *bufio.Reader) (bool, []model.Dialogue) {
 	// Get the user message from the user (in a real application, this would be from the frontend)
 	exitCondition := false
 
@@ -27,23 +27,23 @@ func GetUserMessage(conversation []config.Dialogue, reader *bufio.Reader) (bool,
 		exitCondition = true
 	} else {
 		// Update conversation with user message
-		conversation = append(conversation, config.Dialogue{Role: "user", Content: userMessage})
+		conversation = append(conversation, model.Dialogue{Role: "user", Content: userMessage})
 	}
 
 	return exitCondition, conversation
 }
 
-func GetAIMessage(conversation []config.Dialogue) []config.Dialogue {
+func GetAIMessage(conversation []model.Dialogue) []model.Dialogue {
 	// Find the next message
-	model := GetModel()
-	response := openai.ChatComplete(model, conversation)
+	ai_model := GetModel()
+	response := openai.ChatComplete(ai_model, conversation)
 	response_message := string(response.Choices[0].Message.Content)
 
 	// Output the response
 	fmt.Printf("Butler: %v\n", response_message)
 
 	// Update conversation with system message
-	conversation = append(conversation, config.Dialogue{Role: "assistant", Content: response_message})
+	conversation = append(conversation, model.Dialogue{Role: "assistant", Content: response_message})
 
 	return conversation
 }

@@ -1,4 +1,4 @@
-package config
+package model
 
 // TODO: Make structs for the following tables
 

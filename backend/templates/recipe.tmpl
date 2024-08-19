@@ -1,45 +1,47 @@
 {{ define "recipe" }}
-Generate a recipe for the user {{ .Profile.FirstName }} {{ .Profile.LastName }} according to their requirements and preferences.
+Generate a recipe tailored for {{ .Profile.FirstName }} {{ .Profile.LastName }} based on their preferences and available ingredients.
 
 {{ if .Health.Allergies }}
-Allergy details:
+### Allergy Information:
 {{ range .Health.Allergies }}
 - {{ .ItemName }}: {{ .Description }}
 {{ end }}
 {{ end }}
 
 {{ if .Preferences.DietaryRestrictions }}
-Dietary restrictions:
+### Dietary Restrictions:
 {{ range .Preferences.DietaryRestrictions }}
 - {{ .ItemName }}: {{ .Description }}
 {{ end }}
 {{ end }}
 
 {{ if .Preferences.FavoriteRecipes }}
-Favorite recipes:
+### Favorite Recipes:
 {{ range .Preferences.FavoriteRecipes }}
 - {{ .ItemName }}: {{ .Description }}
 {{ end }}
 {{ end }}
 
 {{ if .Inventory.Items }}
-Known items in user's pantry:
+### Pantry Inventory:
+The following items are available in the pantry:
 {{ range .Inventory.Items }}
 - {{ .ItemName }}: {{ .Quantity }} {{ .Unit }}
 {{ end }}
 {{ end }}
 
 {{ if .RecipePreferences.ShopPreference }}
-User is willing to shop for additional groceries.
+### Shopping Preferences:
 {{ if .RecipePreferences.Budget }}
-Budget: {{ .RecipePreferences.Budget }}
+- Budget: {{ .RecipePreferences.Budget }}
 {{ end }}
 {{ if .RecipePreferences.ItemAvailability }}
-How common the items should be to buy: {{ .RecipePreferences.ItemAvailability }}
+- Preferred item availability: {{ .RecipePreferences.ItemAvailability }}
 {{ end }}
 {{ else }}
+### Shopping Preferences:
 User prefers to use existing pantry items only.
 {{ end }}
 
-Ask any qualifying questions about the user's requirements before generating a recipe.
+Please ask any qualifying questions needed to ensure the recipe meets the user's needs. Assume familiarity with the user's preferences, but avoid explicitly referencing them.
 {{ end }}

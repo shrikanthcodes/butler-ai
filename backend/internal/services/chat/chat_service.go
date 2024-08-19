@@ -1,7 +1,7 @@
 package chat
 
 import (
-	config "backend/internal/config"
+	model "backend/internal/model"
 	templates "backend/internal/services/template"
 	user "backend/internal/services/user"
 	fmt "fmt"
@@ -9,7 +9,7 @@ import (
 
 // GetModel retrieves the model to use for the conversation
 func GetModel() string {
-	return config.DEFAULT_MODEL
+	return model.DEFAULT_MODEL
 }
 
 // GetUserPrompt generates a user prompt based on the user's data
@@ -23,8 +23,8 @@ func GetUserPrompt(userID string) string {
 }
 
 // NewConversation initializes a new conversation
-func NewConversation(conversationID string) []config.Dialogue {
-	conversation := []config.Dialogue{
+func NewConversation(conversationID string) []model.Dialogue {
+	conversation := []model.Dialogue{
 		{Role: "system", Content: GetUserPrompt("test")},
 	}
 	return conversation
@@ -47,6 +47,6 @@ func HandleConversation(conversationID string) {
 }
 
 // SaveConversation saves the conversation state to a database
-func SaveConversation(conversationID string, conversation []config.Dialogue) {
+func SaveConversation(conversationID string, conversation []model.Dialogue) {
 	fmt.Printf("Saving conversation with ID %v\n", conversationID)
 }
