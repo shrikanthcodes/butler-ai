@@ -1,4 +1,2 @@
-src/constants/credentials.py
-/myenv
-__pycache__
+backend/secrets/secret.env
 directory_structure.*

@@ -1,0 +1,18 @@
+{{ define "recipe" }}
+Generate a recipe for the user {{ .Name }} according to their requirements and preferences.
+
+{{ if .Allergy }}
+Allergy details: {{ .Allergy }}
+{{ end }}
+{{ if .Preferences }}
+Preferences: {{ .Preferences }}
+{{ end }}
+{{ if .PantryItems }}
+Known items in user's pantry:
+{{ range .PantryItems }}
+- {{ .ItemName }}: {{ .Quantity }} {{ .Unit }}
+{{ end }}
+{{ end }}
+
+Ask any qualifying questions about the user's requirements before generating a recipe.
+{{ end }}
