@@ -1,7 +1,3 @@
-Here is the updated README reflecting the changes made with MongoDB Dockerfile and `init.sh` being removed and replaced by `backup.sh`, `restore.sh`, and the usage of `rclone` for cloud backups:
-
----
-
 # ButlerAI
 
 ## Overview
