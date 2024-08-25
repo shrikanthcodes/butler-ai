@@ -4,15 +4,22 @@ export const handleConversation = async (userMessage: string, conversation: Dial
     // Add the user message to the conversation
     conversation.push({ role: 'user', content: userMessage });
 
-    // Simulate AI response (you can replace this with actual logic from your Go backend later)
-    const aiResponse = simulateAIResponse(userMessage);
-    conversation.push({ role: 'assistant', content: aiResponse });
+    // Send the conversation to the backend
+    const response = await fetch('http://localhost:8080/chat/conversation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            conversation_id: 'test',
+            messages: conversation,
+        }),
+    });
 
-    return conversation;
-};
+    if (!response.ok) {
+        throw new Error('Failed to handle conversation');
+    }
 
-// Simulate an AI response (replace with real backend logic later)
-const simulateAIResponse = (userMessage: string): string => {
-    // Example simple logic; you can expand this
-    return `AI Response to "${userMessage}"`;
+    const data = await response.json();
+    return data.messages;
 };

@@ -1,137 +1,182 @@
 # ButlerAI
 
-ButlerAI is a comprehensive kitchen inventory management application that leverages advanced AI functionalities for efficient management of recipes, ingredients, and user interactions. The project integrates various AI and NLP capabilities to provide an intuitive and smart user experience.
+## Overview
+ButlerAI is a full-stack application utilizing Docker to streamline development and deployment. The project includes a Go-based backend, a React Native frontend powered by Expo, and MongoDB as the database. The setup is designed for ease of deployment and local development using Docker.
 
-## Table of Contents
-
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-
-## Features
-
-- **Kitchen Inventory Management**: Track and manage your kitchen inventory, including items, recipes, and categories.
-- **AI-Driven Recipe Suggestions**: Get recipe suggestions based on your current inventory using advanced AI algorithms.
-- **User Interaction Management**: Store and manage user conversations with the system for a personalized experience.
-- **Extensible Architecture**: Easily extend and customize the functionalities to fit specific needs.
-
-## Installation
-
-### Prerequisites
-
-- Python 3.7+
-- SQLite
-- Git
-
-### Clone the Repository
-
+## Project Structure
 ```bash
-git clone https://github.com/your-username/butlerai.git
-cd butlerai
+ButlerAI/
+├── backend/
+│   ├── cmd/
+│   ├── internal/
+│   ├── Dockerfile
+│   ├── go.mod
+│   ├── go.sum
+│   └── ...
+├── frontend/
+│   ├── src/
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── package-lock.json
+│   └── ...
+├── mongo/
+│   ├── Dockerfile
+│   ├── init.sh
+│   └── ...
+├── docker-compose.yml
+└── README.md
 ```
 
-### Create a Virtual Environment
+## Requirements
+- **Docker**: Ensure Docker is installed on your system. [Install Docker](https://docs.docker.com/get-docker/)
+- **Docker Compose**: Install Docker Compose. [Install Docker Compose](https://docs.docker.com/compose/install/)
+- **Node.js and npm**: Required for running the frontend locally. [Install Node.js](https://nodejs.org/)
 
+## Installation Steps
+
+### 1. Clone the Repository
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+git clone https://github.com/your-repo/butlerAI.git
+cd butlerAI
 ```
 
-### Install Dependencies
+### 2. Set Up Docker
+Ensure Docker and Docker Compose are installed on your system. Follow the official guides if needed.
+
+### 3. Build and Run the Entire Project
+
+To build and run the frontend, backend, and MongoDB together:
 
 ```bash
-pip install -r requirements.txt
+sudo docker-compose up --build
 ```
 
-### Setup the Database
+This will start all services:
+- **Backend** on port `8080`
+- **Frontend (Expo)** on ports `19006`, `19001`, and `19002`
+- **MongoDB** on port `27017` (or `27018` if changed)
+
+### 4. Stopping the Services
+To stop the services:
 
 ```bash
-python src/setup_database.py
+sudo docker-compose down
 ```
 
-## Usage
+## MongoDB Initialization and Data Management
 
-### Running the Application
+### Automate MongoDB Import and Export
 
-To start the application, run:
+The MongoDB service has been configured to automatically import data upon startup and export data upon shutdown.
+
+1. **Data Import on Startup:**
+   - If a backup file (`/data/backup.archive`) exists inside the MongoDB container, it will automatically be restored when the container starts.
+
+2. **Data Export on Shutdown:**
+   - When the MongoDB container is stopped, the current data will be exported to `/data/backup.archive` to preserve the state for future use.
+
+### Script Details:
+- **Initialization Script (`init.sh`):**
+  The `init.sh` script located in the `mongo/` directory handles the data import/export process.
 
 ```bash
-python src/main.py
+#!/bin/bash
+
+# Import data if the backup exists
+if [ -f /data/backup.archive ]; then
+  mongorestore --archive=/data/backup.archive
+  echo "Data import completed."
+fi
+
+# Trap the stop signal to export data on shutdown
+trap "mongodump --archive=/data/backup.archive; echo 'Data export completed.'" SIGTERM
+
+# Start MongoDB
+exec mongod --bind_ip 0.0.0.0
 ```
 
-### Running Tests
+### Dockerfile for MongoDB
+The custom `Dockerfile` for MongoDB is located in the `mongo/` directory. It ensures the `init.sh` script is copied and executed during the container lifecycle.
 
-To run the tests, use:
+```Dockerfile
+FROM mongo:latest
 
-```bash
-pytest
+# Copy the initialization script
+COPY init.sh /docker-entrypoint-initdb.d/init.sh
+
+# Set executable permissions for the script
+RUN chmod +x /docker-entrypoint-initdb.d/init.sh
 ```
 
-### Generate Documentation
+### Build and Run the MongoDB Service Separately
 
-To generate Sphinx documentation:
+To build and run the MongoDB service separately for development:
 
-1. Navigate to the `documents` directory:
-    ```bash
-    cd documents
-    ```
+1. **Build the MongoDB Image:**
+   ```bash
+   cd mongo
+   sudo docker build -t mongo-dev .
+   ```
 
-2. Build the documentation:
-    ```bash
-    make html
-    ```
+2. **Run the MongoDB Container:**
+   ```bash
+   sudo docker run -p 27017:27017 mongo-dev
+   ```
 
-3. Open the generated documentation in your web browser:
-    ```bash
-    open build/html/index.html
-    ```
+This will allow you to work with MongoDB independently of the other services.
 
-## Documentation
+## Development Instructions
 
-The full documentation is available [here](build/html/index.html) (update the link as needed). It covers all the modules, classes, and functions with detailed descriptions and examples.
+### Backend Development
+To build and run the backend separately for development:
 
-## Contributing
+1. **Build the Backend:**
+   ```bash
+   cd backend
+   sudo docker build -t backend-dev .
+   ```
 
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) for more details.
+2. **Run the Backend:**
+   ```bash
+   sudo docker run -p 8080:8080 backend-dev
+   ```
 
-### Steps to Contribute
+This exposes the backend on port `8080`.
 
-1. **Fork the Repository**: Click the “Fork” button at the top right corner of the repository page on GitHub.
-2. **Clone Your Fork**:
-    ```bash
-    git clone https://github.com/your-username/butlerai.git
-    cd butlerai
-    ```
-3. **Create a Branch**:
-    ```bash
-    git checkout -b feature/your-feature-name
-    ```
-4. **Make Your Changes**: Implement your changes and commit them with a descriptive message.
-5. **Push to Your Fork**:
-    ```bash
-    git push origin feature/your-feature-name
-    ```
-6. **Create a Pull Request**: Open a pull request on the original repository with a description of your changes.
+### Frontend Development
+To build and run the frontend separately for development:
 
-## License
+1. **Build the Frontend:**
+   ```bash
+   cd frontend
+   sudo docker build -t frontend-dev .
+   ```
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+2. **Run the Frontend:**
+   ```bash
+   sudo docker run -p 19006:19006 -p 19001:19001 -p 19002:19002 frontend-dev
+   ```
 
-## Contact
+This exposes the frontend on the necessary Expo ports.
 
-For any inquiries or issues, please contact [your-email@example.com](mailto:your-email@example.com).
+## Known Issues and Resolutions
+
+- **MongoDB Port Conflict**: If you encounter the error `Bind for 0.0.0.0:27017 failed: port is already allocated`, ensure no other MongoDB service or container is running on port `27017`. Alternatively, update the port mapping in `docker-compose.yml` to use a different port.
+
+- **Dependency Conflicts**: Ensure that `expo` and `react-dom` are installed with the correct versions as described. Add these specific installs in the Dockerfile to maintain consistency.
+
+- **Expo CLI Warning**: If you see a warning about the legacy Expo CLI, ensure you are using the latest Expo CLI by running `npm install -g expo-cli@latest`.
+
+## Future Improvements
+- Implement CI/CD pipelines for automatic deployment.
+- Add unit and integration tests for both frontend and backend.
+- Optimize Docker images to reduce build time and image size.
+
+## Conclusion
+This README provides the necessary steps to get ButlerAI up and running. By following the instructions, you should have a working development environment ready for further improvements.
+
+For further issues, feel free to raise an issue or contact the maintainer.
 
 ---
 
-Feel free to customize this template further to fit your project's specific details and requirements.
-
-
-# Clickup
- https://app.clickup.com/9014370434/v/f/90142105578
-
-# Development Schedule
-https://docs.google.com/document/d/1PyFB1IWJU_IuHUAZ0rsWmbKSZbxsLp30_nqBUYXHcio/edit?usp=sharing
+Feel free to customize the content further if necessary, and let me know if you need additional sections or adjustments!

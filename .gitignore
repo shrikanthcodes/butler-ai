@@ -1,2 +1,3 @@
 backend/secrets/secret.env
 directory_structure.*
+node_modules
