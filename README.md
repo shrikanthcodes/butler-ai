@@ -1,7 +1,11 @@
+Here is the updated README reflecting the changes made with MongoDB Dockerfile and `init.sh` being removed and replaced by `backup.sh`, `restore.sh`, and the usage of `rclone` for cloud backups:
+
+---
+
 # ButlerAI
 
 ## Overview
-ButlerAI is a full-stack application utilizing Docker to streamline development and deployment. The project includes a Go-based backend, a React Native frontend powered by Expo, and MongoDB as the database. The setup is designed for ease of deployment and local development using Docker.
+ButlerAI is a full-stack application utilizing Docker to streamline development and deployment. The project includes a Go-based backend, a React Native frontend powered by Expo, and MongoDB as the database. The setup is designed for ease of deployment and local development using Docker, with automated backups to Google Drive using `rclone`.
 
 ## Project Structure
 ```bash
@@ -20,8 +24,8 @@ ButlerAI/
 │   ├── package-lock.json
 │   └── ...
 ├── mongo/
-│   ├── Dockerfile
-│   ├── init.sh
+│   ├── backup.sh
+│   ├── restore.sh
 │   └── ...
 ├── docker-compose.yml
 └── README.md
@@ -31,20 +35,19 @@ ButlerAI/
 - **Docker**: Ensure Docker is installed on your system. [Install Docker](https://docs.docker.com/get-docker/)
 - **Docker Compose**: Install Docker Compose. [Install Docker Compose](https://docs.docker.com/compose/install/)
 - **Node.js and npm**: Required for running the frontend locally. [Install Node.js](https://nodejs.org/)
+- **rclone**: Required for interacting with Google Drive for backup and restore operations. [Install rclone](https://rclone.org/install/)
 
 ## Useful Commands
 
-### 1.Check active docker containers
+### 1. Check active docker containers
 ```bash
 sudo docker ps
 ``` 
 
-### 2.Stop docker container
+### 2. Stop docker container
 ```bash
 sudo docker stop <container-id/container-name>
 ``` 
-
-
 
 ## Installation Steps
 
@@ -57,7 +60,10 @@ cd butlerAI
 ### 2. Set Up Docker
 Ensure Docker and Docker Compose are installed on your system. Follow the official guides if needed.
 
-### 3. Build and Run the Entire Project
+### 3. Configure `rclone`
+Set up `rclone` to interact with Google Drive by following the steps outlined in the [rclone Google Drive guide](https://rclone.org/drive/). Ensure you create a remote named `butlerai`. Request access to project app directory. If interested, reach out to `shrikanthsubramanian@gmail.com`.
+
+### 4. Build and Run the Entire Project
 
 To build and run the frontend, backend, and MongoDB together:
 
@@ -68,76 +74,69 @@ sudo docker-compose up --build
 This will start all services:
 - **Backend** on port `8080`
 - **Frontend (Expo)** on ports `19006`, `19001`, and `19002`
-- **MongoDB** on port `27017` (or `27018` if changed)
+- **MongoDB** on port `27017`
 
-### 4. Stopping the Services
+### 5. Stopping the Services
 To stop the services:
 
 ```bash
 sudo docker-compose down
 ```
 
-## MongoDB Initialization and Data Management
+## MongoDB Data Management
 
-### Automate MongoDB Import and Export
+### Backup and Restore Scripts
 
-The MongoDB service has been configured to automatically import data upon startup and export data upon shutdown.
+The MongoDB service data can be managed using the provided `backup.sh` and `restore.sh` scripts, which automate the backup and restore process using `rclone` to sync with Google Drive.
 
-1. **Data Import on Startup:**
-   - If a backup file (`/data/backup.archive`) exists inside the MongoDB container, it will automatically be restored when the container starts.
-
-2. **Data Export on Shutdown:**
-   - When the MongoDB container is stopped, the current data will be exported to `/data/backup.archive` to preserve the state for future use.
-
-### Script Details:
-- **Initialization Script (`init.sh`):**
-  The `init.sh` script located in the `mongo/` directory handles the data import/export process.
+- **Backup Script (`backup.sh`)**: This script creates a local backup of the MongoDB database and uploads it to Google Drive.
 
 ```bash
 #!/bin/bash
 
-# Import data if the backup exists
-if [ -f /data/backup.archive ]; then
-  mongorestore --archive=/data/backup.archive
-  echo "Data import completed."
-fi
+# Define the local backup path and Google Drive path
+LOCAL_BACKUP_PATH="/docker-entrypoint-initdb.d/backup.archive"
+REMOTE_BACKUP_PATH="butlerai:/backups/backup.archive"
 
-# Trap the stop signal to export data on shutdown
-trap "mongodump --archive=/data/backup.archive; echo 'Data export completed.'" SIGTERM
+# Create a MongoDB dump
+mongodump --archive=$LOCAL_BACKUP_PATH --gzip
+echo "Local backup completed."
 
-# Start MongoDB
-exec mongod --bind_ip 0.0.0.0
+# Upload the backup to Google Drive
+rclone copy $LOCAL_BACKUP_PATH $REMOTE_BACKUP_PATH
+echo "Backup uploaded to Google Drive."
 ```
 
-### Dockerfile for MongoDB
-The custom `Dockerfile` for MongoDB is located in the `mongo/` directory. It ensures the `init.sh` script is copied and executed during the container lifecycle.
+- **Restore Script (`restore.sh`)**: This script downloads the latest backup from Google Drive and restores it to the MongoDB instance.
 
-```Dockerfile
-FROM mongo:latest
+```bash
+#!/bin/bash
 
-# Copy the initialization script
-COPY init.sh /docker-entrypoint-initdb.d/init.sh
+# Define the local backup path and Google Drive path
+LOCAL_BACKUP_PATH="/docker-entrypoint-initdb.d/backup.archive"
+REMOTE_BACKUP_PATH="butlerai:/backups/backup.archive"
 
-# Set executable permissions for the script
-RUN chmod +x /docker-entrypoint-initdb.d/init.sh
+# Download the backup from Google Drive
+rclone copy $REMOTE_BACKUP_PATH $LOCAL_BACKUP_PATH
+echo "Backup downloaded from Google Drive."
+
+# Restore the backup to MongoDB
+mongorestore --archive=$LOCAL_BACKUP_PATH --gzip --drop
+echo "Data restore completed."
 ```
 
-### Build and Run the MongoDB Service Separately
+### Running the Scripts
 
-To build and run the MongoDB service separately for development:
+- **Backup MongoDB Data:**
+  ```bash
+  bash mongo/backup.sh
+  ```
+- **Restore MongoDB Data:**
+  ```bash
+  bash mongo/restore.sh
+  ```
 
-1. **Build the MongoDB Image:**
-   ```bash
-   cd mongo
-   sudo docker build -t mongo-dev .
-   ```
-
-2. **Run the MongoDB Container:**
-   ```bash
-   sudo docker run -p 27017:27017 mongo-dev
-   ```
-
-This will allow you to work with MongoDB independently of the other services.
+These scripts will ensure your data is safely stored in Google Drive and can be restored as needed.
 
 ## Development Instructions
 
@@ -188,7 +187,3 @@ This exposes the frontend on the necessary Expo ports.
 
 ## Conclusion
 This README provides the necessary steps to get ButlerAI up and running. By following the instructions, you should have a working development environment ready for further improvements.
-
-
-
-
