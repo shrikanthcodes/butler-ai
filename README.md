@@ -189,12 +189,5 @@ This exposes the frontend on the necessary Expo ports.
 ## Conclusion
 This README provides the necessary steps to get ButlerAI up and running. By following the instructions, you should have a working development environment ready for further improvements.
 
-For further issues, feel free to raise an issue or contact the maintainer.
-
----
-
-Feel free to customize the content further if necessary, and let me know if you need additional sections or adjustments!
-
-
 
 
