@@ -32,6 +32,20 @@ ButlerAI/
 - **Docker Compose**: Install Docker Compose. [Install Docker Compose](https://docs.docker.com/compose/install/)
 - **Node.js and npm**: Required for running the frontend locally. [Install Node.js](https://nodejs.org/)
 
+## Useful Commands
+
+### 1.Check active docker containers
+```bash
+sudo docker ps
+``` 
+
+### 2.Stop docker container
+```bash
+sudo docker stop <container-id/container-name>
+``` 
+
+
+
 ## Installation Steps
 
 ### 1. Clone the Repository
@@ -180,3 +194,7 @@ For further issues, feel free to raise an issue or contact the maintainer.
 ---
 
 Feel free to customize the content further if necessary, and let me know if you need additional sections or adjustments!
+
+
+
+
