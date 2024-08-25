@@ -13,7 +13,7 @@ func GetReader() *bufio.Reader {
 	return bufio.NewReader(os.Stdin)
 }
 
-func GetUserMessage(conversation []model.Dialogue, reader *bufio.Reader) (bool, []model.Dialogue) {
+func GetUserMessage(conversation []model.ChatDialogue, reader *bufio.Reader) (bool, []model.ChatDialogue) {
 	// Get the user message from the user (in a real application, this would be from the frontend)
 	exitCondition := false
 
@@ -27,13 +27,13 @@ func GetUserMessage(conversation []model.Dialogue, reader *bufio.Reader) (bool, 
 		exitCondition = true
 	} else {
 		// Update conversation with user message
-		conversation = append(conversation, model.Dialogue{Role: "user", Content: userMessage})
+		conversation = append(conversation, model.ChatDialogue{Role: "user", Content: userMessage})
 	}
 
 	return exitCondition, conversation
 }
 
-func GetAIMessage(conversation []model.Dialogue) []model.Dialogue {
+func GetAIMessage(conversation []model.ChatDialogue) []model.ChatDialogue {
 	// Find the next message
 	ai_model := GetModel()
 	response := openai.ChatComplete(ai_model, conversation)
@@ -43,7 +43,7 @@ func GetAIMessage(conversation []model.Dialogue) []model.Dialogue {
 	fmt.Printf("Butler: %v\n", response_message)
 
 	// Update conversation with system message
-	conversation = append(conversation, model.Dialogue{Role: "assistant", Content: response_message})
+	conversation = append(conversation, model.ChatDialogue{Role: "assistant", Content: response_message})
 
 	return conversation
 }

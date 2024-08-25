@@ -13,7 +13,7 @@ import (
 
 // GetModel retrieves the model to use for the conversation
 func GetModel() string {
-	return model.DEFAULT_MODEL
+	return model.DEFAULT_LLM_VERSION
 }
 
 // GetUserPrompt generates a user prompt based on the user's data
@@ -27,8 +27,8 @@ func GetUserPrompt(userID string) string {
 }
 
 // NewConversation initializes a new conversation
-func NewConversation(conversationID string) []model.Dialogue {
-	conversation := []model.Dialogue{
+func NewConversation(conversationID string) []model.ChatDialogue {
+	conversation := []model.ChatDialogue{
 		{Role: "system", Content: GetUserPrompt("test")},
 	}
 	return conversation
@@ -54,8 +54,8 @@ func HandleConversation(conversationID string) {
 func HandleChatConversation(w http.ResponseWriter, r *http.Request) {
 	// Parse the request body to get user message and conversation ID
 	var req struct {
-		ConversationID string           `json:"conversation_id"`
-		Messages       []model.Dialogue `json:"messages"`
+		ConversationID string               `json:"conversation_id"`
+		Messages       []model.ChatDialogue `json:"messages"`
 	}
 
 	// Decode the JSON request payload
@@ -87,7 +87,7 @@ func HandleChatConversation(w http.ResponseWriter, r *http.Request) {
 
 	// Respond with the updated conversation
 	response := struct {
-		Messages []model.Dialogue `json:"messages"`
+		Messages []model.ChatDialogue `json:"messages"`
 	}{
 		Messages: conversation,
 	}
@@ -101,6 +101,6 @@ func HandleChatConversation(w http.ResponseWriter, r *http.Request) {
 }
 
 // SaveConversation saves the conversation state to a database
-func SaveConversation(conversationID string, conversation []model.Dialogue) {
+func SaveConversation(conversationID string, conversation []model.ChatDialogue) {
 	fmt.Printf("Saving conversation with ID %v\n", conversationID)
 }

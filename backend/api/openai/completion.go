@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func ChatComplete(ai_model string, conversation []model.Dialogue) model.Response {
+func ChatComplete(ai_model string, conversation []model.ChatDialogue) model.OpenAIResponse {
 	// Make a POST request to the OpenAI API
 	api_key := secrets.OpenAI_Key()
 
@@ -20,7 +20,7 @@ func ChatComplete(ai_model string, conversation []model.Dialogue) model.Response
 	conversationJSON, err := json.Marshal(conversation)
 	if err != nil {
 		fmt.Println("Error marshalling conversation:", err)
-		return model.Response{}
+		return model.OpenAIResponse{}
 	}
 
 	// Construct the payload
@@ -32,7 +32,7 @@ func ChatComplete(ai_model string, conversation []model.Dialogue) model.Response
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
-		return model.Response{}
+		return model.OpenAIResponse{}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -42,21 +42,21 @@ func ChatComplete(ai_model string, conversation []model.Dialogue) model.Response
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error making request:", err)
-		return model.Response{}
+		return model.OpenAIResponse{}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
-		return model.Response{}
+		return model.OpenAIResponse{}
 	}
 
-	var responseBody model.Response
+	var responseBody model.OpenAIResponse
 	err = json.Unmarshal(body, &responseBody)
 	if err != nil {
 		fmt.Println("Error unmarshalling response body:", err)
-		return model.Response{}
+		return model.OpenAIResponse{}
 	}
 
 	return responseBody

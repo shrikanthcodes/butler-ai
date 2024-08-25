@@ -1,127 +1,67 @@
 package model
 
-// TODO: Make structs for the following tables
-
-type AuthDB struct {
-	UserID      string `json:"user_id"`
-	Passwd      string `json:"passwd"`
-	LastUpdated string `json:"last_updated"`
+type UserProfile struct { //struct to store user's profile information (Each user has a profile with basic information like name, email, phone, etc)
+	UserID      string `json:"user_id"`      // User ID
+	InventoryID string `json:"inventory_id"` // Inventory ID, foreign key
+	FirstName   string `json:"first_name"`   //User First Name
+	LastName    string `json:"last_name"`    //User Last Name
+	Email       string `json:"email"`        //User Email
+	Phone       string `json:"phone"`        //User Phone number
+	Age         string `json:"age"`          //User Age (25, 30, etc)
+	Gender      string `json:"gender"`       //User Gender (Male, Female, Other)
+	Weight      string `json:"weight"`       // Weight (120, 150, etc)
+	WeightUnit  string `json:"weight_unit"`  // Weight unit (kg, lbs, etc)
+	Height      string `json:"height"`       // Height (5'5, 6'0, etc)
+	HeightUnit  string `json:"height_unit"`  // Height unit (ft, cm, etc)
 }
 
-type Refresh struct {
-	RefreshToken string `json:"refresh_token"`
-	UserID       string `json:"user_id"`
-	UserAgent    string `json:"user_agent"`
-	LastLogin    string `json:"last_login"`
-	LastLogout   string `json:"last_logout"`
-	ExpiresAt    string `json:"expires_at"`
+type UserHealth struct { //struct to store user's health information (Each user has health conditions, medications, allergies, dietary restrictions, etc)
+	UserID              string      `json:"user_id"`              // User ID
+	HealthConditions    []BasicInfo `json:"health_conditions"`    // Health conditions like asthma, diabetes, etc
+	Medications         []BasicInfo `json:"medications"`          // Medications like insulin, etc
+	Allergies           []BasicInfo `json:"allergies"`            // Allergies like peanuts, etc
+	DietaryRestrictions []BasicInfo `json:"dietary_restrictions"` // Dietary restrictions like vegetarian, vegan, etc
 }
 
-type LLM struct {
-	UserID     string `json:"user_id"`
-	LLMChoice  string `json:"llm_choice"`
-	LLMVersion string `json:"llm_version"`
-	LLMToken   string `json:"llm_token"`
+type UserAuth struct { //struct to store user's authentication information (Each user has an authentication token, password, last updated timestamp, etc)
+	UserID      string `json:"user_id"`      // User ID
+	Passwd      string `json:"passwd"`       // Password
+	LastUpdated string `json:"last_updated"` // Last updated timestamp
 }
 
-type Integrations struct {
-	UserID           string `json:"user_id"`
-	Meta             string `json:"meta"`
-	MetaToken        string `json:"meta_token"`
-	MetaExpiresAt    string `json:"meta_expires_at"`
-	Google           string `json:"google"`
-	GoogleToken      string `json:"google_token"`
-	GoogleExpiresAt  string `json:"google_expires_at"`
-	Twitter          string `json:"twitter"`
-	TwitterToken     string `json:"twitter_token"`
-	TwitterExpiresAt string `json:"twitter_expires_at"`
+type UserDataComplete struct { //struct to store complete user data (User's profile, health information, preferences, inventory, recipe preferences)
+	Profile           UserProfile        // User's profile information
+	Health            UserHealth         // User's health information
+	Preferences       DietaryPreferences // User's preferences for recipes, food items, cuisines, etc
+	Inventory         FoodInventory      // User's inventory of food items
+	RecipePreferences RecipePreferences  // Recipe preferences for user
 }
 
-// User DB Tables
-type UserProfile struct {
-	UserID     string `json:"user_id"`
-	FirstName  string `json:"first_name"`
-	LastName   string `json:"last_name"`
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
-	Age        string `json:"age"`
-	Gender     string `json:"gender"`
-	Weight     string `json:"weight"`
-	WeightUnit string `json:"weight_unit"`
-	Height     string `json:"height"`
-	HeightUnit string `json:"height_unit"`
+type UserSession struct { //struct to store user's session refresh token information (Each user has a refresh token, user agent, last login, last logout, etc)
+	RefreshToken string `json:"refresh_token"` // Refresh token
+	UserID       string `json:"user_id"`       // User ID
+	UserAgent    string `json:"user_agent"`    // User agent
+	LastLogin    string `json:"last_login"`    // Last login timestamp
+	LastLogout   string `json:"last_logout"`   // Last logout timestamp
+	ExpiresAt    string `json:"expires_at"`    // Refresh token expiry
 }
 
-type Health struct {
-	UserID              string      `json:"user_id"`
-	HealthConditions    []BasicInfo `json:"health_conditions"`
-	Medications         []BasicInfo `json:"medications"`
-	Allergies           []BasicInfo `json:"allergies"`
-	DietaryRestrictions []BasicInfo `json:"dietary_restrictions"`
+type UserLLM struct { //struct to store user's LLM information (Each user has an LLM choice, LLM version, LLM token, etc)
+	UserID     string `json:"user_id"`     // User ID
+	LLMChoice  string `json:"llm_choice"`  // LLM choice
+	LLMVersion string `json:"llm_version"` // LLM version
+	LLMToken   string `json:"llm_token"`   // LLM token
 }
 
-type Conversations struct {
-	ConversationID string     `json:"conversation_id"`
-	UserID         string     `json:"user_id"`
-	ChatHistory    []Dialogue `json:"chat_history"`
-	LastUpdated    string     `json:"last_updated"`
-}
-
-type Preferences struct {
-	UserID              string      `json:"user_id"`
-	FavoriteRecipes     []BasicInfo `json:"favorite_recipes"`
-	DislikedRecipes     []BasicInfo `json:"disliked_recipes"`
-	FavoriteItems       []BasicInfo `json:"favorite_items"`
-	DislikedItems       []BasicInfo `json:"disliked_items"`
-	FavoriteCategories  []string    `json:"favorite_categories"`
-	DislikedCategories  []string    `json:"disliked_categories"`
-	DietaryRestrictions []BasicInfo `json:"dietary_restrictions"`
-}
-
-type Inventory struct {
-	UserID string       `json:"user_id"`
-	Items  []PantryItem `json:"items"`
-}
-
-type Recipe struct {
-	RecipeID        string               `json:"recipe_id"`
-	Name            string               `json:"name"`
-	Category        string               `json:"category"`
-	Cuisine         string               `json:"cuisine"`
-	Ingredients     []PantryItem         `json:"ingredients"`
-	Instructions    []RecipeInstructions `json:"instructions"`
-	NutritionalInfo string               `json:"nutritional_info"`
-	UserID          string               `json:"user_id"`
-	RecipeHTML      string               `json:"recipe_html"`
-}
-
-type BasicInfo struct {
-	ItemName    string `json:"item_name"`
-	Description string `json:"description"`
-}
-
-type RecipeInstructions struct {
-	Intruction_no int    `json:"instruction_no"`
-	Instruction   string `json:"instruction"`
-	Media         string `json:"media"`
-}
-
-// Create a struct for Serving sizes, budget, willingness to shop, etc (user's recipe preferences)
-type RecipePreferences struct {
-	UserID           string `json:"user_id"`
-	ServingSize      string `json:"serving_size"`
-	Budget           string `json:"budget"`
-	Budget_currency  string `json:"budget_currency"`
-	ShopPreference   bool   `json:"shop_preference"`
-	ItemAvailability string `json:"item_availability"`
-	TimeAvailable    string `json:"time_available"`
-	Innovative       bool   `json:"innovative"`
-}
-
-type CompleteUserData struct {
-	Profile           UserProfile
-	Health            Health
-	Preferences       Preferences
-	Inventory         Inventory
-	RecipePreferences RecipePreferences
+type UserIntegration struct { //struct to store user's integrations information (Each user has integrations with Meta, Google, Twitter, etc)
+	UserID           string `json:"user_id"`            // User ID
+	Meta             bool   `json:"meta"`               // Boolean to denote whether user has Meta integration
+	MetaToken        string `json:"meta_token"`         // Meta token
+	MetaExpiresAt    string `json:"meta_expires_at"`    // Meta token expiry
+	Google           bool   `json:"google"`             // Boolean to denote whether user has Google integration
+	GoogleToken      string `json:"google_token"`       // Google token
+	GoogleExpiresAt  string `json:"google_expires_at"`  // Google token expiry
+	Twitter          bool   `json:"twitter"`            // Boolean to denote whether user has Twitter integration
+	TwitterToken     string `json:"twitter_token"`      // Twitter token
+	TwitterExpiresAt string `json:"twitter_expires_at"` // Twitter token expiry
 }
