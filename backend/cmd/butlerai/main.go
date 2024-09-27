@@ -2,11 +2,14 @@ package main
 
 import (
 	config "backend/internal/config"
-	api "backend/pkg/api"
+	"log"
 )
 
 func main() {
-	config.InitDB()  // Initialize database connection
-	api.InitRoutes() // Initialize the routes
+	config.InitDB()                       // Initialize database connection
+	router := config.IntiatializeRouter() // Initialize the router
+
+	log.Println("Starting server on :8080")
+	router.Run(":8080")
 
 }

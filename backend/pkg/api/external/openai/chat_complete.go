@@ -1,4 +1,4 @@
-package external
+package openai
 
 import (
 	model "backend/pkg/models"
