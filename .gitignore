@@ -1,2 +1,4 @@
 dontREADME.md
 backend/.env
+backend/ai_secrets.env
+frontend/node_modules

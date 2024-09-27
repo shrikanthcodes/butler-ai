@@ -1,8 +1,10 @@
 package config
 
 import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	middleware "backend/pkg/api/middlewares"
+
+	cors "github.com/gin-contrib/cors"
+	gin "github.com/gin-gonic/gin"
 )
 
 func IntiatializeRouter() *gin.Engine {
@@ -15,6 +17,8 @@ func IntiatializeRouter() *gin.Engine {
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
 	}))
+
+	router.Use(middleware.LoggingMiddleware())
 
 	return router
 }
