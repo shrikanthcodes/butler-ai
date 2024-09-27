@@ -1,0 +1,113 @@
+### **Architecture Overview for Recipe Generation and Inventory Management System**
+
+This document provides a high-level overview of the architecture, detailing the components, data flows, and considerations for scalability and security.
+
+---
+
+### **1. High-Level Architecture Components**
+
+The system is composed of the following major components:
+
+#### **1.1 Frontend: React PWA (Progressive Web App)**
+- **Technology**: React or Next.js.
+- **Purpose**: This serves as the user interface, where users can interact with the system to manage their inventory, generate recipes, and track their health and fitness goals.
+- **Features**:
+  - Responsive design for both desktop and mobile use.
+  - Interaction with the backend through REST API calls (initially).
+  - PWA functionality to allow offline usage.
+- **Potential Future Consideration**: As the system grows, this PWA could evolve into a full native mobile app using React Native for cross-platform support.
+
+#### **1.2 Backend: Go-based API**
+- **Technology**: Go (Golang) with a framework like Gin or Gorilla Mux.
+- **Purpose**: The backend handles all business logic, connects to the PostgreSQL database, manages sessions, and integrates with external APIs.
+- **Main Responsibilities**:
+  - **User Management**: Authentication (using JWT) and session management.
+  - **Conversation Management**: Storing, retrieving, and updating conversations between users and the AI.
+  - **Inventory Management**: CRUD operations for user inventory, allowing users to add, update, or remove items.
+  - **Recipe Generation**: Invoking AI APIs (OpenAI or user-supplied models) to generate personalized recipes based on user preferences, health conditions, and available ingredients.
+  - **Health and Fitness Tracking**: Storing and processing user health data, including macros and goals.
+  - **AI API Integration**: Calls to external LLM providers for AI-based conversation generation.
+
+#### **1.3 Database: PostgreSQL**
+- **Technology**: PostgreSQL, with the possibility of using JSONB for flexible data storage (semi-structured).
+- **Purpose**: PostgreSQL is the primary data store, handling structured data for users, conversations, inventory, recipes, and health information.
+- **Entities**:
+  - **Users**: Stores user profile information, health conditions, dietary preferences, and authentication data.
+  - **Conversations**: Stores conversation logs with the AI, allowing users to continue or refer back to previous interactions.
+  - **Inventory**: Tracks each user’s food items, quantities, and units.
+  - **Recipes**: Stores the generated recipes for users, including nutritional information and step-by-step instructions.
+  - **Health**: Stores user health information like goals, macros, and dietary restrictions.
+
+#### **1.4 Caching: Redis (Future)**
+- **Technology**: Redis (in-memory cache).
+- **Purpose**: Redis will be used to cache session data, reducing the number of direct database calls and improving system performance.
+- **Use Cases**:
+  - **Session Management**: Caching session information (like active conversations) to reduce database load.
+  - **AI Prompt Caching**: Storing frequently used or repeated AI conversation prompts/responses to minimize LLM API costs.
+
+#### **1.5 External API Integrations**
+- **LLM Providers**: OpenAI (GPT-3.5 initially) and user-supplied models via external APIs.
+  - **Purpose**: To generate conversations and personalized recipe suggestions.
+  - **Scalability Consideration**: As more users opt to use their own models, an API Gateway might be implemented to route requests to the appropriate LLM provider.
+- **Third-Party APIs (Future)**:
+  - **USFDA Database Integration**: To fetch nutritional data for ingredients.
+  - **Store Integration**: To help replenish inventory by connecting to local stores and generating shopping lists.
+  - **OCR API**: For scanning store receipts and automatically updating the inventory.
+
+---
+
+### **2. Data Flow Overview**
+
+#### **2.1 User Registration and Authentication**
+1. **Frontend**: User signs up via the React PWA, submitting their email, password, and profile information.
+2. **Backend**: The Go API handles user registration, creates a new entry in the `User` table, and returns a JWT for session management.
+3. **PostgreSQL**: The user information (profile, authentication, health data) is stored securely in the `User` table.
+
+#### **2.2 Conversation Handling with AI**
+1. **Frontend**: User initiates a conversation with the AI.
+2. **Backend**: The Go API fetches any previous conversation history from PostgreSQL (if it exists) and loads it into memory.
+3. **External API**: The backend sends a prompt to the LLM API (OpenAI) to generate a response.
+4. **Backend**: The generated response is stored in PostgreSQL (as part of the conversation log) and sent back to the frontend.
+5. **Frontend**: The user sees the AI-generated response and continues the conversation.
+
+#### **2.3 Inventory and Recipe Management**
+1. **Frontend**: User updates their inventory by adding/removing food items.
+2. **Backend**: The Go API updates the `Inventory` table in PostgreSQL with the new item quantities.
+3. **Recipe Generation**: When the user requests a recipe, the backend gathers data from the user profile (dietary preferences, health data) and inventory to generate a tailored recipe via the LLM.
+4. **External API**: The LLM generates a recipe, considering the user's inventory and preferences, and returns it to the backend.
+5. **Frontend**: The generated recipe is displayed, and the user can save it to their profile.
+
+---
+
+### **3. Scalability Considerations**
+
+- **Database Scaling**: PostgreSQL can handle a moderate amount of traffic initially, but as the user base grows, you can introduce **replication** (read replicas) or move to a managed cloud database (e.g., AWS RDS).
+- **Backend Scaling**: Initially, the backend will run on a single instance (Hetzner), but can be scaled horizontally using containers (Docker) and an orchestration platform (Kubernetes) if needed.
+- **Session Management**: Introducing Redis early on will help alleviate pressure on the database by caching active sessions and frequently accessed data (like conversation states).
+
+---
+
+### **4. Security Considerations**
+
+- **Authentication**: JWT-based stateless authentication with short-lived tokens and refresh tokens for user sessions.
+- **Database Security**: Store sensitive data (passwords, health information) using strong encryption (e.g., bcrypt for passwords).
+- **SSL/TLS Encryption**: Ensure all communications between the frontend and backend are encrypted using HTTPS.
+- **Firewall and Access Control**: Set up firewalls on your hosting server (e.g., Hetzner) to restrict access and only allow necessary ports (SSH, HTTP, HTTPS).
+
+---
+
+### **5. Future Integrations and Expansions**
+
+- **Mobile App**: In the future, the React PWA can evolve into a native mobile app using **React Native**. This would allow for seamless cross-platform development (iOS and Android).
+- **OCR and AI Features**: You can add additional machine learning and AI features, such as **OCR** to scan grocery receipts and automatically update the user’s inventory.
+- **Health Integrations**: Integrating with health tracking APIs (e.g., Fitbit, Apple Health) to further tailor recipes and track user progress toward health goals.
+
+---
+
+### **6. Deployment Strategy**
+
+For now, the plan is to:
+1. **Local Development**: Build and test the core features (authentication, inventory management, conversation handling) locally.
+2. **PoC Deployment**: Deploy the PoC on two Hetzner instances, one for the app and one for the database, to keep costs low.
+3. **MVP Launch on AWS**: Once you are ready to scale, leverage the AWS Free Tier to host both the app and the database, utilizing services like **EC2** (for the backend) and **RDS** (for the PostgreSQL database).
+
