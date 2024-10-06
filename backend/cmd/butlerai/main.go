@@ -21,7 +21,7 @@ func main() {
 	gs := llm.InitializeGeminiService()
 
 	// Start a new chat session with a custom system prompt
-	gs.StartNewChat("You are an expert in giving ideas for meals. You are an expert at explaining things like you are talking to a 5 year old (ELI5) (Answer in a single string)", []model.Dialogue{})
+	gs.StartNewChat("You are an expert in giving ideas for meals. You are an expert at explaining things like you are talking to a 5 year old (ELI5) (Answer in a single string)", []model.Dialogue{}, 1000, 0.5)
 
 	fmt.Println("Chat session started, you are now talking to a go expert")
 
@@ -30,7 +30,7 @@ func main() {
 	fmt.Println(text)
 
 	// First user message
-	response, err := gs.PredictChat(ctx, text+"(Answer in 50 words or less)", 150, 0.7)
+	response, err := gs.PredictChat(ctx, text+"(Answer in 50 words or less)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func main() {
 	fmt.Println(text)
 
 	// Next user message continues the conversation
-	response, err = gs.PredictChat(ctx, text+"(Answer in 50 words or less)", 150, 0.7)
+	response, err = gs.PredictChat(ctx, text+"(Answer in 50 words or less)")
 	if err != nil {
 		log.Fatal(err)
 	}
