@@ -3,11 +3,14 @@ package handlers
 import (
 	"net/http"
 
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
 // Auth handlers for auth routes
 func Login(c *gin.Context) {
+	fmt.Println("Handler Reached")
 	c.JSON(http.StatusOK, gin.H{"message": "Login"})
 }
 
