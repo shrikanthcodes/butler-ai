@@ -1,7 +1,6 @@
 package routes
 
 import (
-	middleware "backend/pkg/api/middlewares"
 	handler "backend/pkg/api/v1/handlers"
 
 	gin "github.com/gin-gonic/gin"
@@ -9,7 +8,7 @@ import (
 
 func AuthRoutes(router *gin.Engine) {
 	auth := router.Group("/api")
-	auth.Use(middleware.GeneralAuthMiddleware())
+	//auth.Use(middleware.GeneralAuthMiddleware())
 	{
 		auth.POST("/login", handler.Login)                       // Login
 		auth.POST("/register", handler.Register)                 // Register

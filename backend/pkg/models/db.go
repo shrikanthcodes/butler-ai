@@ -15,14 +15,13 @@ type User struct {
 	// Relationships to other tables
 	Auth         *Authentication `gorm:"foreignKey:UserID"` // Optional relationship
 	Choices      *Choice         `gorm:"foreignKey:UserID"` // Optional relationship
-	Conversation *Conversation   `gorm:"foreignKey:UserID"` // Optional relationship
+	Conversation []Conversation  `gorm:"foreignKey:UserID"` // Optional relationship
 	Profile      *Profile        `gorm:"foreignKey:UserID"` // Optional relationship
 	Health       *Health         `gorm:"foreignKey:UserID"` // Optional relationship
 	Diet         *Diet           `gorm:"foreignKey:UserID"` // Optional relationship
 	Inventory    *Inventory      `gorm:"foreignKey:UserID"` // Optional relationship
 	Goal         *Goal           `gorm:"foreignKey:UserID"` // Optional relationship
 	Script       *Script         `gorm:"foreignKey:UserID"` // Optional relationship
-	LLM          *LLM            `gorm:"foreignKey:UserID"` // Optional relationship
 	Shopping     *Shopping       `gorm:"foreignKey:UserID"` // Optional relationship
 	MealChoices  *MealChoice     `gorm:"foreignKey:UserID"` // Optional relationship
 }
@@ -37,7 +36,6 @@ type Choice struct {
 	IsInventory   bool `json:"inventory" gorm:"default:false"`
 	IsGoal        bool `json:"goal" gorm:"default:false"`
 	IsScript      bool `json:"script" gorm:"default:false"`
-	IsLLM         bool `json:"llm" gorm:"default:false"`
 	IsShopping    bool `json:"shopping" gorm:"default:false"`
 	IsPreferences bool `json:"preferences" gorm:"default:false"`
 }
@@ -50,6 +48,9 @@ type Conversation struct {
 	User         User       `json:"user" gorm:"foreignKey:UserID;references:UserID"` // Define foreign key
 	Conversation []Dialogue `json:"conversation" gorm:"type:jsonb"`                  // Actual conversation between user and AI
 	LastUpdated  string     `json:"last_updated"`                                    // Last updated timestamp
+	Summary      string     `json:"summary"`
+	Task         string     `json:"task"`
+	IsActive     bool       `json:"is_active"`
 }
 
 // 3. Health
@@ -148,14 +149,14 @@ type Authentication struct {
 
 // 11. LLM
 // LLM model linked to User
-type LLM struct {
-	gorm.Model
-	UserID     string `json:"user_id"`                                         // Foreign key
-	User       User   `json:"user" gorm:"foreignKey:UserID;references:UserID"` // Foreign key relationship to User
-	LLMChoice  string `json:"llm_choice"`                                      // LLM choice (e.g., GPT-3)
-	LLMVersion string `json:"llm_version"`                                     // Version of the LLM used (e.g., GPT-3.5)
-	LLMToken   string `json:"llm_token"`                                       // API token for LLM usage
-}
+//type LLM struct {
+//	gorm.Model
+//	UserID     string `json:"user_id"`                                         // Foreign key
+//	User       User   `json:"user" gorm:"foreignKey:UserID;references:UserID"` // Foreign key relationship to User
+//	LLMChoice  string `json:"llm_choice"`                                      // LLM choice (e.g., GPT-3)
+//	LLMVersion string `json:"llm_version"`                                     // Version of the LLM used (e.g., GPT-3.5)
+//	LLMToken   string `json:"llm_token"`                                       // API token for LLM usage
+//}
 
 // 12. Recipe
 // Recipe model optionally linked to User

@@ -1,15 +1,20 @@
 package models
 
-// These are supplementary data structures (not a table in DB)
+import "log"
+
 type Dialogue struct {
-	Role    string `json:"role"`    // Role of the message (e.g. "system", "user", "assistant")
+	Role    string `json:"role"`    // Role of the message (e.g. "user", "model")
 	Content string `json:"content"` // Content of the message
 }
 
-type Role string // Role of the message (e.g. "system", "user", "assistant")
-
-const (
-	SystemRole    Role = "system"    // System role for the AI
-	UserRole      Role = "user"      // User role for the AI
-	AssistantRole Role = "assistant" // Assistant role for the AI
-)
+func SetRole(role string) string {
+	switch role {
+	case "user":
+		return "user"
+	case "model":
+		return "model"
+	default:
+		log.Fatalf("Invalid role")
+		return ""
+	}
+}
