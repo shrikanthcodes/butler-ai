@@ -1,55 +1,52 @@
 package ai
 
 import (
-	context "context"
-	errors "errors"
-	fmt "fmt"
-	log "log"
-	os "os"
-	strings "strings"
+	"context"
+	"errors"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+	"sync"
 
-	models "backend/pkg/models"
+	"backend/pkg/models"
 
 	genai "github.com/google/generative-ai-go/genai"
-	"github.com/joho/godotenv"
 	"google.golang.org/api/googleapi"
-	iterator "google.golang.org/api/iterator"
-	option "google.golang.org/api/option"
+	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
-// GeminiService handles interactions with Gemini AI
+// GeminiService handles interactions with Gemini AI.
 type GeminiService struct {
 	client         *genai.Client
 	model          *genai.GenerativeModel
 	chatSession    *genai.ChatSession
 	safetySettings []*genai.SafetySetting
-}
-
-func get_api_key() string {
-	err := godotenv.Load("/home/shrikanth/Documents/GitHub/butlerAI/backend/ai_secrets.env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-	API_KEY := os.Getenv("GEMINI_API_KEY")
-	if API_KEY == "" {
-		log.Fatalf("API_KEY not set in environment")
-	}
-	return API_KEY
+	mu             sync.Mutex // Mutex to protect shared resources.
 }
 
 const MODEL_NAME = "gemini-1.5-flash"
 
-// InitializeGeminiService creates a new instance of GeminiService with safety settings
-func InitializeGeminiService() *GeminiService {
+// InitializeGeminiService creates a new instance of GeminiService with safety settings.
+func InitializeGeminiService() (*GeminiService, error) {
 	ctx := context.Background()
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(get_api_key()))
-	if err != nil {
-		log.Fatalf("Failed to create genai client: %v", err)
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	if apiKey == "" {
+		return nil, errors.New("GEMINI_API_KEY environment variable not set")
 	}
+
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create genai client: %w", err)
+	}
+
 	model := client.GenerativeModel(MODEL_NAME)
-	// Configure default safety settings
+
 	safetySettings := DefaultSafetySettings()
+
+	model.SafetySettings = safetySettings
 
 	chatSession := model.StartChat()
 
@@ -58,41 +55,59 @@ func InitializeGeminiService() *GeminiService {
 		model:          model,
 		chatSession:    chatSession,
 		safetySettings: safetySettings,
-	}
+	}, nil
 }
 
-// Close gracefully shuts down the GeminiService
+// Close gracefully shuts down the GeminiService.
 func (gs *GeminiService) Close() error {
 	log.Println("Closing GeminiService")
 	return gs.client.Close()
 }
 
-// StartNewChat starts a new chat session without previous context
-func (gs *GeminiService) StartNewChat(prompt string, recent_dialogues []models.Dialogue, maxTokens int32, temperature float32) {
-	if len(gs.chatSession.History) != 0 {
-		log.Panic("There is an ongoing chat session")
+// StartNewChat starts a new chat session without previous context.
+func (gs *GeminiService) StartNewChat(prompt string, recentDialogues []models.Dialogue, maxTokens int32, temperature float32) error {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	log.Println("Starting New Chat Session")
+
+	if gs.chatSession != nil {
+		gs.EndChat()
+		return errors.New("there is an ongoing chat session")
 	}
+
+	log.Println("Creating New Chat Session")
 	gs.chatSession = gs.model.StartChat()
+
+	if gs.chatSession == nil {
+		return errors.New("failed to start chat session")
+	}
 
 	gs.model.SetMaxOutputTokens(maxTokens)
 	gs.model.SetTemperature(temperature)
-
 	gs.model.SystemInstruction = genai.NewUserContent(genai.Text(prompt))
+	log.Printf("System Instruction: %s\n", prompt)
 
-	// Load n recent dialogue from conversation history
-	for _, dialogue := range recent_dialogues {
-		gs.AppendDialogueToChatHistory(dialogue.Role, dialogue.Content)
+	// Load recent dialogues into the chat history.
+	for _, dialogue := range recentDialogues {
+		log.Printf("Adding Dialogue to Chat History: %s: %s\n", dialogue.Role, dialogue.Content)
+		gs.appendDialogueToChatHistory(dialogue.Role, dialogue.Content)
 	}
+
+	return nil
 }
 
-// EndChat ends the current chat session
+// EndChat ends the current chat session.
 func (gs *GeminiService) EndChat() {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
 	log.Println("Closing Chat Session")
 	gs.chatSession = nil
 }
 
-// AppendDialogueToChatHistory adds a new dialogue to the chat session
-func (gs *GeminiService) AppendDialogueToChatHistory(role, content string) {
+// appendDialogueToChatHistory adds a new dialogue to the chat session.
+func (gs *GeminiService) appendDialogueToChatHistory(role, content string) {
 	newContent := &genai.Content{
 		Parts: []genai.Part{
 			genai.Text(content),
@@ -102,30 +117,32 @@ func (gs *GeminiService) AppendDialogueToChatHistory(role, content string) {
 	gs.chatSession.History = append(gs.chatSession.History, newContent)
 }
 
-// PredictChat generates the next dialogue in a conversation
+// PredictChat generates the next dialogue in a conversation.
 func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (string, error) {
-	// Start a new chat session with a new context
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
 	if gs.chatSession == nil {
-		log.Panic("Can't start chat session without a system prompt")
+		return "", errors.New("can't start chat session without a system prompt")
 	}
 
-	// Add user message to history
-	gs.AppendDialogueToChatHistory(models.SetRole("user"), userMessage)
+	// Add user message to history.
+	gs.appendDialogueToChatHistory(models.RoleUser, userMessage)
 
-	// Send message and get response
+	// Send message and get response.
 	response, err := gs.chatSession.SendMessage(ctx, genai.Text(userMessage))
 	if err != nil {
-		// Check if the error is a googleapi.Error and extract details
+		// Check if the error is a googleapi.Error and extract details.
 		var googleErr *googleapi.Error
 		if errors.As(err, &googleErr) {
-			fmt.Printf("Google API error: Code %d, Message: %s, Details: %v\n", googleErr.Code, googleErr.Message, googleErr.Body)
+			log.Printf("Google API error: Code %d, Message: %s, Details: %v\n", googleErr.Code, googleErr.Message, googleErr.Body)
 		} else {
-			fmt.Printf("Unexpected error: %v\n", err)
+			log.Printf("Unexpected error: %v\n", err)
 		}
 		return "", fmt.Errorf("prediction error: %w", err)
 	}
 
-	// Extract text from response
+	// Extract text from response.
 	var result strings.Builder
 	for _, candidate := range response.Candidates {
 		for _, part := range candidate.Content.Parts {
@@ -135,19 +152,20 @@ func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (s
 		}
 	}
 
-	// Append assistant's response to chat history
-	gs.AppendDialogueToChatHistory(models.SetRole("model"), result.String())
+	// Append assistant's response to chat history.
+	gs.appendDialogueToChatHistory(models.RoleModel, result.String())
 
 	return result.String(), nil
 }
 
-// Predict generates a one-shot response based on the provided text
+// Predict generates a one-shot response based on the provided text.
 func (gs *GeminiService) Predict(ctx context.Context, text string, maxTokens int32, temperature float32) (string, error) {
-	// Set model parameters
+	gs.mu.Lock()
 	gs.model.SetMaxOutputTokens(maxTokens)
 	gs.model.SetTemperature(temperature)
+	gs.mu.Unlock()
 
-	// Generate content
+	// Generate content.
 	iter := gs.model.GenerateContentStream(ctx, genai.Text(text))
 	var result strings.Builder
 	for {
@@ -156,9 +174,9 @@ func (gs *GeminiService) Predict(ctx context.Context, text string, maxTokens int
 			break
 		}
 		if err != nil {
-			log.Fatal(err)
+			return "", fmt.Errorf("generation error: %w", err)
 		}
-		// Extract text from response
+		// Extract text from response.
 		for _, candidate := range response.Candidates {
 			for _, part := range candidate.Content.Parts {
 				if textPart, ok := part.(genai.Text); ok {
@@ -170,9 +188,9 @@ func (gs *GeminiService) Predict(ctx context.Context, text string, maxTokens int
 	return result.String(), nil
 }
 
-// DefaultSafetySettings allows setting the safety thresholds
+// DefaultSafetySettings allows setting the safety thresholds.
 func DefaultSafetySettings() []*genai.SafetySetting {
-	// Configure default safety settings
+	// Configure default safety settings.
 	safetySettings := []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryHarassment,
