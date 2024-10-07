@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"backend/pkg/models"
+	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	genai "github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/googleapi"
@@ -71,12 +71,18 @@ func (gs *GeminiService) StartNewChat(prompt string, recentDialogues []models.Di
 
 	log.Println("Starting New Chat Session")
 
-	if gs.chatSession != nil {
-		gs.EndChat()
-		return errors.New("there is an ongoing chat session")
-	}
+	// if gs.chatSession != nil {
+	// 	gs.EndChat()
+	// 	return errors.New("there is an ongoing chat session")
+	// }
 
-	log.Println("Creating New Chat Session")
+	// log.Println("Creating New Chat Session")
+
+	// if gs.chatSession != nil {
+	// 	log.Println("There is an existing chat session, ending it first.")
+	// 	gs.EndChat()
+	// }
+
 	gs.chatSession = gs.model.StartChat()
 
 	if gs.chatSession == nil {
@@ -94,6 +100,7 @@ func (gs *GeminiService) StartNewChat(prompt string, recentDialogues []models.Di
 		gs.appendDialogueToChatHistory(dialogue.Role, dialogue.Content)
 	}
 
+	log.Printf("Added a bunch of dialogues")
 	return nil
 }
 

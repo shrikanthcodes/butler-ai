@@ -1,5 +1,9 @@
 package models
 
+import (
+	enum "github.com/shrikanthcodes/butler-ai/backend/pkg/models/enum"
+)
+
 type Importance struct {
 	Importance string   `json:"importance"` // Importance of the item (e.g. "high", "medium", "low")
 	Items      []string `json:"items"`      // List of items
@@ -32,9 +36,8 @@ type RecipeInstructions struct { //struct to store recipe instructions (step by 
 }
 
 type RecipeTime struct { //struct to store recipe time information (Available at recipe level or user recipe generation level)
-	CookingTime     string `json:"cooking_time"`      //string to store cooking time
-	CookingTimeUnit string `json:"cooking_time_unit"` //string to store cooking time unit (minutes, hours, etc)
-	PrepTime        string `json:"prep_time"`         //string to store prep time
-	PrepTimeUnit    string `json:"prep_time_unit"`    //string to store prep time unit (minutes, hours, etc)
-	TotalTime       string `json:"total_time"`        //string to store total time
+	CookingTime int            `json:"cooking_time"` //string to store cooking time
+	TimeUnit    enum.TimeUnits `json:"time_unit"`    //string to store cooking time unit (minutes, hours, etc)
+	PrepTime    int            `json:"prep_time"`    //string to store prep time
+	TotalTime   int            `json:"total_time"`   //string to store total time
 }

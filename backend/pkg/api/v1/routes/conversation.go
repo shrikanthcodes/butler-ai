@@ -1,8 +1,8 @@
 package routes
 
 import (
-	middleware "backend/pkg/api/middlewares"
-	handler "backend/pkg/api/v1/handlers"
+	middleware "github.com/shrikanthcodes/butler-ai/backend/pkg/api/middlewares"
+	handler "github.com/shrikanthcodes/butler-ai/backend/pkg/api/v1/handlers"
 
 	gin "github.com/gin-gonic/gin"
 )
