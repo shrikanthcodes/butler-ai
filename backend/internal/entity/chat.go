@@ -1,4 +1,4 @@
-package models
+package entity
 
 type Dialogue struct {
 	Role    string `json:"role"`    // Role of the message (e.g. "user", "model")

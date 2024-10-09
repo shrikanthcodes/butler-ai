@@ -4,12 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/shrikanthcodes/butler-ai/backend/internal/entity"
 	"log"
 	"os"
 	"strings"
 	"sync"
-
-	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	genai "github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/googleapi"
@@ -65,7 +64,7 @@ func (gs *GeminiService) Close() error {
 }
 
 // StartNewChat starts a new chat session without previous context.
-func (gs *GeminiService) StartNewChat(prompt string, recentDialogues []models.Dialogue, maxTokens int32, temperature float32) error {
+func (gs *GeminiService) StartNewChat(prompt string, recentDialogues []entity.Dialogue, maxTokens int32, temperature float32) error {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
@@ -134,7 +133,7 @@ func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (s
 	}
 
 	// Add user message to history.
-	gs.appendDialogueToChatHistory(models.RoleUser, userMessage)
+	gs.appendDialogueToChatHistory(entity.RoleUser, userMessage)
 
 	// Send message and get response.
 	response, err := gs.chatSession.SendMessage(ctx, genai.Text(userMessage))
@@ -160,7 +159,7 @@ func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (s
 	}
 
 	// Append assistant's response to chat history.
-	gs.appendDialogueToChatHistory(models.RoleModel, result.String())
+	gs.appendDialogueToChatHistory(entity.RoleModel, result.String())
 
 	return result.String(), nil
 }

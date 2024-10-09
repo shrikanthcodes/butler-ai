@@ -1,4 +1,4 @@
-package routes
+package v1
 
 // import (
 // 	middleware "github.com/shrikanthcodes/butler-ai/backend/pkg/api/middlewares"

@@ -2,19 +2,17 @@ package butlerai
 
 import (
 	"bufio"
-	"context"
 	"fmt"
+	config "github.com/shrikanthcodes/butler-ai/backend/config"
+	chat "github.com/shrikanthcodes/butler-ai/backend/internal/services"
+	templates "github.com/shrikanthcodes/butler-ai/backend/pkg/services/templates"
+	"gorm.io/gorm"
 	"log"
 	"os"
 	"path/filepath"
-
-	config "github.com/shrikanthcodes/butler-ai/backend/internal/config"
-	chat "github.com/shrikanthcodes/butler-ai/backend/pkg/services/chat"
-	templates "github.com/shrikanthcodes/butler-ai/backend/pkg/services/templates"
-	"gorm.io/gorm"
 )
 
-func Run(cfg string) {
+func Run(cfg *config.Config) {
 	xy, err := config.InitDB(cfg)
 	if err != nil {
 		log.Default()

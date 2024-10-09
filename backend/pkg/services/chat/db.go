@@ -2,8 +2,7 @@ package chat
 
 import (
 	"errors"
-
-	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
+	"github.com/shrikanthcodes/butler-ai/backend/internal/entity"
 
 	"gorm.io/gorm"
 )
@@ -19,22 +18,22 @@ func NewDBConversationStore(db *gorm.DB) *DBConversationStore {
 }
 
 // GetConversation retrieves a conversation from the database.
-func (store *DBConversationStore) GetConversation(convID string) (models.Conversation, error) {
-	var conv models.Conversation
+func (store *DBConversationStore) GetConversation(convID string) (entity.Conversation, error) {
+	var conv entity.Conversation
 	if err := store.db.Where("conv_id = ?", convID).First(&conv).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Return a new empty conversation
-			return models.Conversation{
+			return entity.Conversation{
 				ConvID:          convID,
-				Conversation:    models.DialogueArray{},
-				RecentDialogues: models.DialogueArray{},
+				Conversation:    entity.DialogueArray{},
+				RecentDialogues: entity.DialogueArray{},
 				Summary:         nil,
 				IsActive:        false,
 			}, nil
 		}
-		return models.Conversation{}, err
+		return entity.Conversation{}, err
 	}
-	return models.Conversation{
+	return entity.Conversation{
 		ConvID:          conv.ConvID,
 		Conversation:    conv.Conversation,
 		RecentDialogues: conv.RecentDialogues,
@@ -44,9 +43,9 @@ func (store *DBConversationStore) GetConversation(convID string) (models.Convers
 }
 
 // SaveConversation saves a conversation to the database.
-func (store *DBConversationStore) SaveConversation(conv *models.Conversation) error {
+func (store *DBConversationStore) SaveConversation(conv *entity.Conversation) error {
 
-	dbConv := models.Conversation{
+	dbConv := entity.Conversation{
 		ConvID:       conv.ConvID,
 		UserID:       conv.UserID,
 		Conversation: conv.Conversation,

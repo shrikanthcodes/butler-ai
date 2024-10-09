@@ -2,8 +2,8 @@ package chat
 
 import (
 	errors "errors"
+	models "github.com/shrikanthcodes/butler-ai/backend/internal/entity"
 
-	models "github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 	templates "github.com/shrikanthcodes/butler-ai/backend/pkg/services/templates"
 )
 

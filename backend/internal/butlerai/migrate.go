@@ -2,15 +2,15 @@ package butlerai
 
 import (
 	"fmt"
+	config2 "github.com/shrikanthcodes/butler-ai/backend/docs/config"
 	"log"
 
-	config "github.com/shrikanthcodes/butler-ai/backend/internal/config"
 	"gorm.io/gorm"
 )
 
 func init() {
 	// Initialize DB connection
-	str, err := config.InitDB("Hoi")
+	str, err := config2.InitDB("Hoi")
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -18,7 +18,7 @@ func init() {
 
 	var db *gorm.DB
 	// Run migrations
-	err = config.RunMigrations(db)
+	err = config2.RunMigrations(db)
 	if err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}

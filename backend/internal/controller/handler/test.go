@@ -1,10 +1,9 @@
-package handlers
+package handler
 
 import (
-	config "github.com/shrikanthcodes/butler-ai/backend/internal/config"
-	model "github.com/shrikanthcodes/butler-ai/backend/pkg/models"
-
 	"github.com/gin-gonic/gin"
+	"github.com/shrikanthcodes/butler-ai/backend/docs/config"
+	model "github.com/shrikanthcodes/butler-ai/backend/internal/entity"
 )
 
 // HealthCheck returns the list of users from the database

@@ -1,10 +1,9 @@
 package config
 
 import (
-	middleware "github.com/shrikanthcodes/butler-ai/backend/pkg/api/middlewares"
-
 	cors "github.com/gin-contrib/cors"
 	gin "github.com/gin-gonic/gin"
+	middleware "github.com/shrikanthcodes/butler-ai/backend/docs"
 )
 
 func IntiatializeRouter() *gin.Engine {

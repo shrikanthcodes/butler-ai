@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 // import (
 // 	db "github.com/shrikanthcodes/butler-ai/backend/pkg/services/db"

@@ -1,9 +1,8 @@
-package routes
+package v1
 
 import (
-	handler "github.com/shrikanthcodes/butler-ai/backend/pkg/api/v1/handlers"
-
 	gin "github.com/gin-gonic/gin"
+	"github.com/shrikanthcodes/butler-ai/backend/internal/controller/handler"
 )
 
 func AuthRoutes(router *gin.Engine) {

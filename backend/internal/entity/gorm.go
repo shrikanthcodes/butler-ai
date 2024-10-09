@@ -1,5 +1,5 @@
 // Implementing Scanner/Valuer for []Dialogue
-package models
+package entity
 
 import (
 	"database/sql/driver"

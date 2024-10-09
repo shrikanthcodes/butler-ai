@@ -1,10 +1,9 @@
-package routes
+package v1
 
 import (
-	middleware "github.com/shrikanthcodes/butler-ai/backend/pkg/api/middlewares"
-	handler "github.com/shrikanthcodes/butler-ai/backend/pkg/api/v1/handlers"
-
 	gin "github.com/gin-gonic/gin"
+	"github.com/shrikanthcodes/butler-ai/backend/internal/controller/handler"
+	middleware "github.com/shrikanthcodes/butler-ai/backend/internal/controller/http"
 )
 
 func TestRoutes(router *gin.Engine) {

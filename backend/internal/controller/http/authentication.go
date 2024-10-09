@@ -1,8 +1,6 @@
-package middlewares
+package http
 
 import (
-	http "net/http"
-
 	gin "github.com/gin-gonic/gin"
 )
 
@@ -25,15 +23,15 @@ func GeneralAuthMiddleware() gin.HandlerFunc {
 // Admin Authentication Middleware
 func AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.Request.Header.Get("Authorization")
-
-		// Mock token validation (in a real case, you'd validate JWT or session token)
-		if token != "Bearer valid-admin-token" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort() // Stop further processing
-			return
-		}
-		// Continue to the next middleware or the handler
+		//token := c.Request.Header.Get("Authorization")
+		//
+		//// Mock token validation (in a real case, you'd validate JWT or session token)
+		//if token != "Bearer valid-admin-token" {
+		//	c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		//	c.Abort() // Stop further processing
+		//	return
+		//}
+		//// Continue to the next middleware or the handler
 		c.Next()
 	}
 }

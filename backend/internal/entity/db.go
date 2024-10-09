@@ -1,9 +1,8 @@
-package models
+package entity
 
 import (
+	"github.com/shrikanthcodes/butler-ai/backend/internal/entity/enum"
 	"time"
-
-	enum "github.com/shrikanthcodes/butler-ai/backend/pkg/models/enum"
 
 	"gorm.io/gorm"
 )

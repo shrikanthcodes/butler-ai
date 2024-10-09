@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/shrikanthcodes/butler-ai/backend/internal/entity"
 
-	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 	ai "github.com/shrikanthcodes/butler-ai/backend/pkg/services/ai/llm"
 	"github.com/shrikanthcodes/butler-ai/backend/pkg/services/templates"
 )
@@ -62,7 +62,7 @@ func (cs *ChatService) PredictChat(ctx context.Context, convID, chatType, userMe
 	}
 
 	// Update conversation history.
-	cs.updateConversationHistory(conversation, models.Dialogue{Role: models.RoleUser, Content: userMessage}, models.Dialogue{Role: models.RoleModel, Content: response})
+	cs.updateConversationHistory(conversation, entity.Dialogue{Role: entity.RoleUser, Content: userMessage}, entity.Dialogue{Role: entity.RoleModel, Content: response})
 
 	// Save updated conversation.
 	err = cs.conversationDB.SaveConversation(conversation)
@@ -115,7 +115,7 @@ func (cs *ChatService) StartChat(convID string, chatType string) error {
 }
 
 // getConversation retrieves a conversation from the database.
-func (cs *ChatService) getConversation(convID string) (*models.Conversation, error) {
+func (cs *ChatService) getConversation(convID string) (*entity.Conversation, error) {
 	conversation, err := cs.conversationDB.GetConversation(convID)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (cs *ChatService) getConversation(convID string) (*models.Conversation, err
 }
 
 // updateConversationHistory updates the conversation history.
-func (cs *ChatService) updateConversationHistory(conversation *models.Conversation, userDialogue, modelDialogue models.Dialogue) {
+func (cs *ChatService) updateConversationHistory(conversation *entity.Conversation, userDialogue, modelDialogue entity.Dialogue) {
 	conversation.Conversation = append(conversation.Conversation, userDialogue, modelDialogue)
 
 	// Maintain recent dialogues for summarization purposes (last 6 dialogues).
