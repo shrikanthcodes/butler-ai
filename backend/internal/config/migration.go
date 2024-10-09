@@ -3,17 +3,36 @@ package config
 import (
 	"log"
 
-	models "backend/pkg/models"
+	model "backend/pkg/models"
 
 	"gorm.io/gorm"
 )
 
-// RunMigrations runs the necessary database migrations
+// RunMigrations - function to run migrations in order
 func RunMigrations(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{}) // Migrate your models
+	err := db.AutoMigrate(
+		&model.User{},
+	)
 	if err != nil {
-		return err
+		log.Fatalf("Failed to run users table migration: %v", err)
 	}
-	log.Println("Database migrations ran successfully!")
-	return nil
+
+	err = db.AutoMigrate(
+		&model.Authentication{},
+		&model.Writeup{},
+		&model.Profile{},
+		&model.Health{},
+		&model.Diet{},
+		&model.Inventory{},
+		&model.Shopping{},
+		&model.MealChoice{},
+		&model.Goal{},
+		&model.Conversation{},
+		&model.Recipe{},
+	)
+	if err != nil {
+		log.Fatalf("Failed to run other tables migration: %v", err)
+	}
+
+	return err
 }
