@@ -3,7 +3,7 @@ package config
 import (
 	"log"
 
-	model "backend/pkg/models"
+	model "github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	"gorm.io/gorm"
 )

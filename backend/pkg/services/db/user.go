@@ -1,7 +1,7 @@
 package db
 
 import (
-	"backend/pkg/models"
+	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	"gorm.io/gorm"
 )

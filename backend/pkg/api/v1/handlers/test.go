@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	config "backend/internal/config"
-	model "backend/pkg/models"
+	config "github.com/shrikanthcodes/butler-ai/backend/internal/config"
+	model "github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )

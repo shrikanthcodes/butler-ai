@@ -1,12 +1,13 @@
 package chat
 
 import (
-	"backend/pkg/models"
-	ai "backend/pkg/services/ai/llm"
-	"backend/pkg/services/templates"
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
+	ai "github.com/shrikanthcodes/butler-ai/backend/pkg/services/ai/llm"
+	"github.com/shrikanthcodes/butler-ai/backend/pkg/services/templates"
 )
 
 type ChatService struct {

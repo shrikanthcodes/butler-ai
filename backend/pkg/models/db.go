@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	enum "backend/pkg/models/enum"
+	enum "github.com/shrikanthcodes/butler-ai/backend/pkg/models/enum"
 
 	"gorm.io/gorm"
 )

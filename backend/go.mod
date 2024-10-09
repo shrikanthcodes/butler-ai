@@ -1,4 +1,4 @@
-module backend
+module github.com/shrikanthcodes/butler-ai/backend
 
 go 1.22.6
 

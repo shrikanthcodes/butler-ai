@@ -1,7 +1,7 @@
 package handlers
 
 // import (
-// 	db "backend/pkg/services/db"
+// 	db "github.com/shrikanthcodes/butler-ai/backend/pkg/services/db"
 // 	http "net/http"
 
 // 	gin "github.com/gin-gonic/gin"

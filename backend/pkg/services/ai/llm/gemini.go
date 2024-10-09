@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"backend/pkg/models"
+	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	genai "github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/googleapi"

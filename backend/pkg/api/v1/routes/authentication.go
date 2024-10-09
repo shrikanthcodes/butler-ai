@@ -1,7 +1,7 @@
 package routes
 
 import (
-	handler "backend/pkg/api/v1/handlers"
+	handler "github.com/shrikanthcodes/butler-ai/backend/pkg/api/v1/handlers"
 
 	gin "github.com/gin-gonic/gin"
 )

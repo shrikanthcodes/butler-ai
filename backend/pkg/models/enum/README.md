@@ -1,6 +1,6 @@
 # How to define enums
 
-This package contains enums used throughout the ButlerAI backend. Enumerations are a set of named values that represent a specific type of data (think a distinct set of elements), making the code more readable and maintainable.
+This package contains enums used throughout the butler-ai backend. Enumerations are a set of named values that represent a specific type of data (think a distinct set of elements), making the code more readable and maintainable.
 
 
 Define each enum as follows:

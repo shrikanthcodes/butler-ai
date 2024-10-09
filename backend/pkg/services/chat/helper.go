@@ -1,9 +1,10 @@
 package chat
 
 import (
-	models "backend/pkg/models"
-	templates "backend/pkg/services/templates"
 	errors "errors"
+
+	models "github.com/shrikanthcodes/butler-ai/backend/pkg/models"
+	templates "github.com/shrikanthcodes/butler-ai/backend/pkg/services/templates"
 )
 
 // getTemplateNameByChatType returns the template name based on the chat type.

@@ -1,7 +1,7 @@
 package models
 
 import (
-	enum "backend/pkg/models/enum"
+	enum "github.com/shrikanthcodes/butler-ai/backend/pkg/models/enum"
 )
 
 type Importance struct {

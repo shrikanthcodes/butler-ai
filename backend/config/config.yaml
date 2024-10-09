@@ -1,0 +1,36 @@
+app:
+  name: 'butler-ai'
+  version: '1.0.0'
+
+http:
+  port: '8080'
+
+logger:
+  log_level: 'debug'
+  rollbar_env: 'butler-ai'
+
+cors:
+  allow_origins: 
+    - 'http://localhost:3000'
+    - '*'  # for testing using POSTMAN
+  allow_methods: 
+    - 'GET'
+    - 'POST'
+    - 'PUT'
+    - 'DELETE'
+  allow_headers: 
+    - 'Content-Type'
+  allow_credentials: true
+
+postgres:
+  host: 'localhost'
+  port: '5432'
+  user: 'dev-user'
+  password: 'butlerai123*'
+  dbname: 'butlerdb'
+  sslmode: 'disable'
+  pool_max: 2
+
+rabbitmq:
+  rpc_server_exchange: 'rpc_server'
+  rpc_client_exchange: 'rpc_client'

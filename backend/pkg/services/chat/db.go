@@ -1,8 +1,9 @@
 package chat
 
 import (
-	"backend/pkg/models"
 	"errors"
+
+	"github.com/shrikanthcodes/butler-ai/backend/pkg/models"
 
 	"gorm.io/gorm"
 )
