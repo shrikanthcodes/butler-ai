@@ -38,15 +38,14 @@ type Writeup struct {
 
 // Conversation defines the structure of the conversation table
 type Conversation struct {
-	ConvID          string         `json:"conv_id" gorm:"primaryKey"`
-	UserID          string         `json:"user_id"`
-	User            User           `gorm:"foreignKey:UserID;references:UserID"`
-	Conversation    DialogueArray  `json:"conversation" gorm:"type:jsonb"`
-	LastUpdated     *time.Time     `json:"last_updated"`
-	Summary         *string        `json:"summary"`
-	RecentDialogues DialogueArray  `json:"recent_dialogues" gorm:"type:jsonb"`
-	ChatType        enum.ChatTypes `json:"chat_type"`
-	IsActive        bool           `json:"is_active"`
+	ConvID      string         `json:"conv_id" gorm:"primaryKey"`
+	UserID      string         `json:"user_id"`
+	User        User           `gorm:"foreignKey:UserID;references:UserID"`
+	Transcript  DialogueArray  `json:"conversation" gorm:"type:jsonb"`
+	LastUpdated *time.Time     `json:"last_updated"`
+	Summary     *string        `json:"summary"`
+	ChatType    enum.ChatTypes `json:"chat_type"`
+	IsActive    bool           `json:"is_active"`
 	BaseModel
 }
 

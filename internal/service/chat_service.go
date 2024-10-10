@@ -5,12 +5,34 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shrikanthcodes/butler-ai/internal/entity"
+	"sync"
 )
 
 type ChatService struct {
 	geminiService   *GeminiService
 	templateService *TemplateService
 	conversationDB  *DBConversationStore
+}
+
+// InMemoryChatStore stores active conversations in-memory for batching
+// Recent dialogues should be added here, not in DB
+type InMemoryChatStore struct {
+	activeConversations map[string]*entity.Conversation
+	recentDialogues     entity.Dialogue
+	mu                  sync.Mutex
+}
+
+func NewInMemoryChatStore() *InMemoryChatStore {
+	return &InMemoryChatStore{
+		activeConversations: make(map[string]*entity.Conversation),
+		recentDialogues:     entity.Dialogue{},
+	}
+}
+
+func getRecentDialogues() entity.Dialogue {
+	// Get 6 recent dialogues from the active conversation just loaded
+	// from the database
+	return entity.Dialogue{}
 }
 
 // InitializeChatService initializes the ChatService with the database store
