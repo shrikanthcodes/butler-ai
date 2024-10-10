@@ -2,40 +2,42 @@ package mapper
 
 import "errors"
 
-// MapTemplateToChatType returns the template file string based on the chat type.
-func MapTemplateToChatType(chatType string) (string, error) {
+// setTemplate returns the template file string based on the chat type.
+func setTemplate(chatType string) string {
 	switch chatType {
 	case "recipe":
-		return "recipe-mode-001.tmpl", nil
+		return "recipe-mode-001.tmpl"
 	case "shopping":
-		return "shopping-mode-001.tmpl", nil
-	case "health": return "health-mode-001.tmpl", nil
+		return "shopping-mode-001.tmpl"
+	case "health":
+		return "health-mode-001.tmpl"
 	case "motivation":
-		return "motivation-mode-001.tmpl", nil
+		return "motivation-mode-001.tmpl"
 	case "calorie_tracker":
-		return "calorie-tracker-mode-001.tmpl", nil
-	case "summarization": return "chat-summarization-mode-001.tmpl", nil
+		return "calorie-tracker-mode-001.tmpl"
+	case "summarization":
+		return "chat-summarization-mode-001.tmpl"
 	default:
-		return "", errors.New("invalid chat type")
+		return ""
 	}
 }
 
-func setParametersByChatType(chatType string) (int32, float32) {
+func MapAIParametersToChatType(chatType string) (string, int32, float32, error) {
 	switch chatType {
 	case "recipe":
-		return setResponseLength("long"), setTemperature("creative")
+		return setTemplate("recipe"), setResponseLength("long"), setTemperature("creative"), nil
 	case "shopping":
-		return setResponseLength("short"), setTemperature("regular")
+		return setTemplate("shopping"), setResponseLength("short"), setTemperature("regular"), nil
 	case "health":
-		return setResponseLength("long"), setTemperature("regular")
+		return setTemplate("health"), setResponseLength("long"), setTemperature("regular"), nil
 	case "motivation":
-		return setResponseLength("medium"), setTemperature("creative")
+		return setTemplate("motivation"), setResponseLength("medium"), setTemperature("creative"), nil
 	case "calorie_tracker":
-		return setResponseLength("medium"), setTemperature("deterministic")
+		return setTemplate("calorie_tracker"), setResponseLength("medium"), setTemperature("deterministic"), nil
 	case "summarization":
-		return setResponseLength("long"), setTemperature("regular")
+		return setTemplate("summarization"), setResponseLength("long"), setTemperature("regular"), nil
 	default:
-		return setResponseLength("medium"), setTemperature("regular")
+		return "", setResponseLength("medium"), setTemperature("regular"), errors.New("invalid chat type")
 	}
 }
 
@@ -63,3 +65,4 @@ func setResponseLength(outputLength string) int32 {
 	default:
 		return 1000
 	}
+}

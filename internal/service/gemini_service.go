@@ -74,25 +74,32 @@ func (gs *GeminiService) Close() error {
 	return gs.client.Close()
 }
 
+// SetModelParameters sets the model parameters for the chat session.
+func (gs *GeminiService) SetModelParameters(maxTokens int32, temperature float32) *GeminiService {
+	gs.model.SetMaxOutputTokens(maxTokens)
+	gs.model.SetTemperature(temperature)
+	return gs
+}
+
+// SetSystemPrompt sets the system prompt for the chat session.
+func (gs *GeminiService) SetSystemPrompt(systemPrompt string) *GeminiService {
+	gs.model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
+	return gs
+
+}
+
 // StartNewChat starts a new chat session without previous context.
-func (gs *GeminiService) StartNewChat(systemPrompt string, recentDialogues []entity.Dialogue, maxTokens int32, temperature float32) error {
+func (gs *GeminiService) StartNewChat(recentDialogues []entity.Dialogue) error {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
-	log.Println("Starting New Chat Session")
-
 	gs.chatSession = gs.model.StartChat()
-	gs.model.SetMaxOutputTokens(maxTokens)
-	gs.model.SetTemperature(temperature)
-	gs.model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
 
 	// Load recent dialogues into the chat history.
 	for _, dialogue := range recentDialogues {
-		log.Printf("Adding Dialogue to Chat History: %s: %s\n", dialogue.Role, dialogue.Content)
 		gs.appendDialogueToChatHistory(dialogue.Role, dialogue.Content)
 	}
 
-	log.Printf("Added a bunch of dialogues")
 	return nil
 }
 

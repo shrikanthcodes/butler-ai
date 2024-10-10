@@ -5,65 +5,74 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shrikanthcodes/butler-ai/internal/entity"
+	"github.com/shrikanthcodes/butler-ai/internal/service/mapper"
 	"sync"
+	"time"
 )
 
+//Save conversation from cache to db is based on is_active:
+//4 ways this is possible
+//1. User ends the chat (is_active set to False, chat loaded to rabbitMQ),
+//2. Same conversation is opened in another session
+//	(is_active momentarily set to False (chat loaded to rabbitMQ) and is_active is true async,
+//	3. Timeout (is_active set to false after a given amount of inactive time),
+//	4. Refresh state (every 5 minutes, chat is backed up regardless of is_active and chat loaded to rabbitMQ)
+//Implement Redis for in-memory cache, and RabbitMQ for message queueing
+
+// ChatService handles interactions with the chatbot.
 type ChatService struct {
-	geminiService   *GeminiService
-	templateService *TemplateService
-	conversationDB  *DBConversationStore
+	GeminiService   *GeminiService
+	ChatCache       *ChatCacheRepository
+	TemplateService *TemplateService
 }
 
-// InMemoryChatStore stores active conversations in-memory for batching
-// Recent dialogues should be added here, not in DB
-type InMemoryChatStore struct {
+// ChatCacheRepository stores active conversations in-memory for batching
+type ChatCacheRepository struct {
 	activeConversations map[string]*entity.Conversation
-	recentDialogues     entity.Dialogue
+	recentDialogues     map[string]*[]entity.Dialogue
+	lastUpdated         map[string]time.Time
 	mu                  sync.Mutex
 }
 
-func NewInMemoryChatStore() *InMemoryChatStore {
-	return &InMemoryChatStore{
+func NewChatCache() (*ChatCacheRepository, error) {
+	return &ChatCacheRepository{
 		activeConversations: make(map[string]*entity.Conversation),
-		recentDialogues:     entity.Dialogue{},
-	}
+		recentDialogues:     make(map[string]*[]entity.Dialogue),
+		lastUpdated:         make(map[string]time.Time),
+	}, nil
 }
 
-func getRecentDialogues() entity.Dialogue {
-	// Get 6 recent dialogues from the active conversation just loaded
-	// from the database
-	return entity.Dialogue{}
-}
-
-// InitializeChatService initializes the ChatService with the database store
-func InitializeChatService(db *DBConversationStore, templateService *TemplateService) (*ChatService, error) {
-	gemini, err := InitializeGeminiService()
+// NewChatService initializes the ChatService with a cache
+func NewChatService(geminiService *GeminiService, templateService *TemplateService) (*ChatService, error) {
+	cache, err := NewChatCache()
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize GeminiService: %w", err)
+		return nil, err
 	}
 	return &ChatService{
-		geminiService:   gemini,
-		templateService: templateService,
-		conversationDB:  db,
+		GeminiService:   geminiService,
+		ChatCache:       cache,
+		TemplateService: templateService,
 	}, nil
+}
+
+// GetConversation retrieves 6 most recent dialogues of the conversation from transcript.
+func getRecentDialogues() []entity.Dialogue {
+	// Get 6 recent dialogues from the active conversation just loaded
+	// from the database
+	return []entity.Dialogue{}
 }
 
 // EndChat ends the conversation session and saves it to the database.
 func (cs *ChatService) EndChat(convID string) error {
-	conversation, err := cs.getConversation(convID)
-	if err != nil {
-		return err
-	}
-
 	conversation.IsActive = false
 
 	// Save the conversation to the database.
-	err = cs.conversationDB.SaveConversation(conversation)
+	err = cs.SaveConversation(conversation)
 	if err != nil {
 		return fmt.Errorf("failed to save conversation: %w", err)
 	}
 
-	cs.geminiService.EndChat()
+	cs.GeminiService.EndChat()
 	return nil
 }
 
@@ -94,44 +103,53 @@ func (cs *ChatService) PredictChat(ctx context.Context, convID, chatType, userMe
 
 // StartChat initializes a conversation session based on the specified chat type.
 func (cs *ChatService) StartChat(convID string, chatType string) error {
-	maxTokens, temperature := setParametersByChatType(chatType)
-
-	templateName, err := getTemplateNameByChatType(chatType)
+	templateName, maxTokens, temperature, err := mapper.MapAIParametersToChatType(chatType)
 	if err != nil {
 		return err
 	}
 
-	data := cs.conversationDB.DataBuilder(chatType, maxTokens)
-
-	// Render the prompt using the template service.
-	prompt, err := cs.templateService.RenderTemplate(templateName, data)
+	// Render the prompt using the template service, data is the interface with all the variables
+	prompt, err := cs.TemplateService.RenderTemplate(templateName, cs.DataBuilder(chatType))
 	if err != nil {
 		return fmt.Errorf("failed to render template: %w", err)
 	}
 
-	conversation, err := cs.getConversation(convID)
-	if err != nil {
-		return fmt.Errorf("failed to load conversation: %w", err)
+	conversation := entity.Conversation{}
+
+	if _, exists := cs.ChatCache.activeConversations[convID]; !exists {
+		conversation, err := cs.getConversation(convID)
+		if err != nil {
+			return fmt.Errorf("failed to load conversation: %w", err)
+		}
+		cs.ChatCache.activeConversations[convID] = conversation
 	}
+
+	recentDialogue := getRecentDialogues()
 
 	if conversation.IsActive {
-		return errors.New("conversation already in progress")
+		err := cs.SaveConversation(conversation)
+		if err != nil {
+			return fmt.Errorf("failed to save conversation: %w", err)
+		}
+		//send conversation, summary from cache to db
+		//start a new chat (not really) and reuse the cached conversation from in memory
 	}
+	cs.GeminiService.SetSystemPrompt(prompt)
+	cs.GeminiService.SetModelParameters(maxTokens, temperature)
+	// Set Conversation to active
 
-	err = cs.geminiService.StartNewChat(prompt, conversation.RecentDialogues, maxTokens, temperature)
+	err = cs.GeminiService.StartNewChat(recentDialogue)
 	if err != nil {
 		return fmt.Errorf("failed to start new chat: %w", err)
 	}
 
 	conversation.IsActive = true
-
-	err = cs.conversationDB.SaveConversation(conversation)
-	if err != nil {
-		return fmt.Errorf("failed to save conversation: %w", err)
-	}
+	cs.ChatCache.activeConversations[convID].IsActive = true
 
 	return nil
 }
+
+// Save upon cache invalidation, implement Redis for in-memory cache
 
 // getConversation retrieves a conversation from the database.
 func (cs *ChatService) getConversation(convID string) (*entity.Conversation, error) {
@@ -154,7 +172,11 @@ func (cs *ChatService) updateConversationHistory(conversation *entity.Conversati
 }
 
 func (cs *ChatService) CloseGeminiService() {
-	cs.geminiService.Close()
+	err := cs.GeminiService.Close()
+	if err != nil {
+		fmt.Println("Failed to close GeminiService")
+	}
+
 }
 
 // getTemplateNameByChatType returns the template name based on the chat type.

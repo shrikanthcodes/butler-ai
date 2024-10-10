@@ -68,3 +68,13 @@ func (DBC *DBConnector) GetActiveConversations(userID string) ([]entity.Conversa
 	}
 	return conversations, nil
 }
+
+// SetConversationActive sets a conversation to active
+func (DBC *DBConnector) SetConversationActive(convID string) error {
+	return DBC.db.Model(&entity.Conversation{}).Where("conv_id = ?", convID).Update("is_active", true).Error
+}
+
+// SetConversationInactive sets a conversation to inactive
+func (DBC *DBConnector) SetConversationInactive(convID string) error {
+	return DBC.db.Model(&entity.Conversation{}).Where("conv_id = ?", convID).Update("is_active", false).Error
+}
