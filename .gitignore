@@ -1,4 +1,2 @@
-dontREADME.md
-github.com/shrikanthcodes/butler-ai/backend/.env
-github.com/shrikanthcodes/butler-ai/backend/ai_secrets.env
-frontend/node_modules
+.env
+/tmp
