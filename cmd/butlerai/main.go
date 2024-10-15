@@ -3,16 +3,16 @@ package main
 import (
 	"log"
 
-	config "github.com/shrikanthcodes/butler-ai/config"
-	butlerai "github.com/shrikanthcodes/butler-ai/internal/butlerai"
+	"github.com/shrikanthcodes/butler-ai/config"
+	"github.com/shrikanthcodes/butler-ai/internal/app"
 )
 
 func main() {
-	cfg, err := config.SetConfig()
+	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
 	// Run
-	butlerai.Run(cfg)
+	app.Run(cfg)
 }

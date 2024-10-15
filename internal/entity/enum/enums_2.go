@@ -3,13 +3,13 @@ package enum
 type Difficulties int
 
 const (
-	Difficulty0 Difficulties = iota
-	Difficulty1
-	Difficulty2
+	Difficulties0 Difficulties = iota
+	Difficulties1
+	Difficulties2
 )
 
 func (d Difficulties) String() string {
-	if d < Difficulty0 || d > Difficulty2 {
+	if d < Difficulties0 || d > Difficulties2 {
 		return "Unknown"
 	}
 	return [...]string{"Easy", "Medium", "Hard"}[d]
@@ -18,17 +18,17 @@ func (d Difficulties) String() string {
 type GoalTypes int
 
 const (
-	GoalType0 GoalTypes = iota
-	GoalType1
-	GoalType2
-	GoalType3
-	GoalType4
-	GoalType5
-	GoalType6
+	GoalTypes0 GoalTypes = iota
+	GoalTypes1
+	GoalTypes2
+	GoalTypes3
+	GoalTypes4
+	GoalTypes5
+	GoalTypes6
 )
 
 func (g GoalTypes) String() string {
-	if g < GoalType0 || g > GoalType6 {
+	if g < GoalTypes0 || g > GoalTypes6 {
 		return "Unknown"
 	}
 	return [...]string{"Weight Loss", "Weight Gain", "Self Love", "Addiction", "Custom", "New Skill", "Discipline"}[g]
@@ -37,14 +37,14 @@ func (g GoalTypes) String() string {
 type MealTypes int
 
 const (
-	MealType0 MealTypes = iota
-	MealType1
-	MealType2
-	MealType3
+	MealTypes0 MealTypes = iota
+	MealTypes1
+	MealTypes2
+	MealTypes3
 )
 
 func (m MealTypes) String() string {
-	if m < MealType0 || m > MealType3 {
+	if m < MealTypes0 || m > MealTypes3 {
 		return "Unknown"
 	}
 	return [...]string{"Breakfast", "Lunch", "Dinner", "Snack"}[m]
@@ -53,18 +53,18 @@ func (m MealTypes) String() string {
 type NutritionTags int
 
 const (
-	NutritionTag0 NutritionTags = iota
-	NutritionTag1
-	NutritionTag2
-	NutritionTag3
-	NutritionTag4
-	NutritionTag5
-	NutritionTag6
-	NutritionTag7
+	NutritionTags0 NutritionTags = iota
+	NutritionTags1
+	NutritionTags2
+	NutritionTags3
+	NutritionTags4
+	NutritionTags5
+	NutritionTags6
+	NutritionTags7
 )
 
 func (n NutritionTags) String() string {
-	if n < NutritionTag0 || n > NutritionTag7 {
+	if n < NutritionTags0 || n > NutritionTags7 {
 		return "Unknown"
 	}
 	return [...]string{"Low Calorie", "High Protein", "Low Carb", "Low Fat", "High Fiber", "Low Sodium", "Low Sugar", "Balanced"}[n]
@@ -73,12 +73,12 @@ func (n NutritionTags) String() string {
 type Roles int
 
 const (
-	Role0 Roles = iota
-	Role1
+	Roles0 Roles = iota
+	Roles1
 )
 
 func (r Roles) String() string {
-	if r < Role0 || r > Role1 {
+	if r < Roles0 || r > Roles1 {
 		return "Unknown"
 	}
 	return [...]string{"User", "Admin"}[r]

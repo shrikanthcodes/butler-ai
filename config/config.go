@@ -8,12 +8,13 @@ import (
 type (
 	// Config holds all the configuration settings.
 	Config struct {
-		App      App  `yaml:"app"`
-		HTTP     HTTP `yaml:"http"`
-		Log      Log  `yaml:"logger"`
-		CORS     CORS `yaml:"cors"`
-		Postgres PG   `yaml:"postgres"`
-		RabbitMQ RMQ  `yaml:"rabbitmq"`
+		App      App   `yaml:"app"`
+		HTTP     HTTP  `yaml:"api"`
+		Log      Log   `yaml:"logger"`
+		CORS     CORS  `yaml:"cors"`
+		Postgres PG    `yaml:"postgres"`
+		RabbitMQ RMQ   `yaml:"rabbitmq"`
+		Redis    Redis `yaml:"cache"`
 	}
 
 	// App holds application-specific settings.
@@ -24,7 +25,7 @@ type (
 
 	// HTTP holds HTTP server settings.
 	HTTP struct {
-		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
+		Port int `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
 	// Log holds logging settings.
@@ -58,27 +59,43 @@ type (
 		ServerExchange string `env-required:"true" yaml:"rpc_server_exchange" env:"RMQ_RPC_SERVER"`
 		ClientExchange string `env-required:"true" yaml:"rpc_client_exchange" env:"RMQ_RPC_CLIENT"`
 	}
+
+	// Redis holds Redis configuration.
+	Redis struct {
+		Host     string `env-required:"true" yaml:"host"     env:"REDIS_HOST"`
+		Port     string `env-required:"true" yaml:"port"     env:"REDIS_PORT"`
+		Password string `env-required:"true" yaml:"password" env:"REDIS_PASSWORD"`
+		DB       int    `env-required:"true" yaml:"db"       env:"REDIS_DB"`
+		PoolMax  int    `env-required:"true" yaml:"pool_max" env:"REDIS_POOL_MAX"`
+		Address  string
+	}
 )
 
-// SetConfig returns app configuration parsed from the config file and environment variables.
-func SetConfig() (*Config, error) {
+// NewConfig returns app configuration parsed from the config file and environment variables.
+func NewConfig() (*Config, error) {
 	cfg := &Config{}
 
-	cfg.Postgres.URL = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName,
-		cfg.Postgres.Port, cfg.Postgres.SSLMode)
+	cfg.Postgres.URL = buildURL(&cfg.Postgres)
+	cfg.Redis.Address = buildAddr(&cfg.Redis)
 
-	// Read configuration from the YAML file
 	err := cleanenv.ReadConfig("./config/config.yml", cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
-	// Override with environment variables if they exist
 	err = cleanenv.ReadEnv(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("environment config error: %w", err)
 	}
 
 	return cfg, nil
+}
+
+// buildURL returns a formatted URL string for PostgresSQL connection.
+func buildURL(pg *PG) string {
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s pool_max=%d",
+		pg.Host, pg.Port, pg.User, pg.Password, pg.DBName, pg.SSLMode, pg.PoolMax)
+}
+func buildAddr(cfg *Redis) string {
+	return fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)
 }

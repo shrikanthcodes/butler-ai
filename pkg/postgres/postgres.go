@@ -4,15 +4,16 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/jackc/pgx/v5"
+	"github.com/shrikanthcodes/butler-ai/pkg/logger"
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
-	_defaultMaxPoolSize  = 1
+	_defaultMaxPoolSize  = 2
 	_defaultConnAttempts = 10
 	_defaultConnTimeout  = time.Second
 )
@@ -25,10 +26,22 @@ type Postgres struct {
 
 	Builder squirrel.StatementBuilderType
 	Pool    *pgxpool.Pool
+	Log     *logger.Logger
+}
+
+type ConnPool struct {
+	*pgxpool.Pool
+}
+
+// Pool interface is responsible for managing the connection pool.
+type Pool interface {
+	Begin(context.Context) (pgx.Tx, error)
+	BeginFunc(context.Context, func(pgx.Tx) error) error
+	Close()
 }
 
 // New -.
-func New(url string, opts ...Option) (*Postgres, error) {
+func New(url string, log *logger.Logger, opts ...Option) (*ConnPool, error) {
 	pg := &Postgres{
 		maxPoolSize:  _defaultMaxPoolSize,
 		connAttempts: _defaultConnAttempts,
@@ -50,12 +63,12 @@ func New(url string, opts ...Option) (*Postgres, error) {
 	poolConfig.MaxConns = int32(pg.maxPoolSize)
 
 	for pg.connAttempts > 0 {
-		pg.Pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
+		pg.Pool, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
 		if err == nil {
 			break
 		}
 
-		log.Printf("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
+		pg.Log.Info("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
 
 		time.Sleep(pg.connTimeout)
 
@@ -66,7 +79,7 @@ func New(url string, opts ...Option) (*Postgres, error) {
 		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
 
-	return pg, nil
+	return &ConnPool{pg.Pool}, nil
 }
 
 // Close -.
