@@ -9,7 +9,7 @@ type (
 	// Config holds all the configuration settings.
 	Config struct {
 		App      App  `yaml:"app"`
-		HTTP     HTTP `yaml:"http"`
+		HTTP     HTTP `yaml:"api"`
 		Log      Log  `yaml:"logger"`
 		CORS     CORS `yaml:"cors"`
 		Postgres PG   `yaml:"postgres"`
@@ -24,7 +24,7 @@ type (
 
 	// HTTP holds HTTP server settings.
 	HTTP struct {
-		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
+		Port int `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
 	// Log holds logging settings.
@@ -68,13 +68,11 @@ func SetConfig() (*Config, error) {
 		cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.DBName,
 		cfg.Postgres.Port, cfg.Postgres.SSLMode)
 
-	// Read configuration from the YAML file
 	err := cleanenv.ReadConfig("./config/config.yml", cfg)
 	if err != nil {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
-	// Override with environment variables if they exist
 	err = cleanenv.ReadEnv(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("environment config error: %w", err)

@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	config "github.com/shrikanthcodes/butler-ai/config"
-	butlerai "github.com/shrikanthcodes/butler-ai/internal/butlerai"
+	"github.com/shrikanthcodes/butler-ai/config"
+	"github.com/shrikanthcodes/butler-ai/internal/app"
 )
 
 func main() {
@@ -14,5 +14,5 @@ func main() {
 	}
 
 	// Run
-	butlerai.Run(cfg)
+	app.Run(cfg)
 }

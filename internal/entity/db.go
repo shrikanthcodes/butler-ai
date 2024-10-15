@@ -49,8 +49,8 @@ type Conversation struct {
 	BaseModel
 }
 
-// Health defines the structure of the health table
-type Health struct {
+// Medical defines the structure of the health table
+type Medical struct {
 	UserID              string      `json:"user_id" gorm:"primaryKey"`
 	User                User        `gorm:"foreignKey:UserID;references:UserID"`
 	HealthConditions    []BasicInfo `json:"health_conditions" gorm:"type:jsonb"`

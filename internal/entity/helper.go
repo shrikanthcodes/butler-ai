@@ -4,16 +4,6 @@ import (
 	"github.com/shrikanthcodes/butler-ai/internal/entity/enum"
 )
 
-type Dialogue struct {
-	Role    string `json:"role"`    // Role of the message (e.g. "user", "model")
-	Content string `json:"content"` // Content of the message
-}
-
-const (
-	RoleUser  = "user"
-	RoleModel = "model"
-)
-
 type Importance struct {
 	Importance string   `json:"importance"` // Importance of the item (e.g. "high", "medium", "low")
 	Items      []string `json:"items"`      // List of items

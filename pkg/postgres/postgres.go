@@ -4,7 +4,7 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"log"
+	"github.com/shrikanthcodes/butler-ai/pkg/logger"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	_defaultMaxPoolSize  = 1
+	_defaultMaxPoolSize  = 2
 	_defaultConnAttempts = 10
 	_defaultConnTimeout  = time.Second
 )
@@ -25,10 +25,11 @@ type Postgres struct {
 
 	Builder squirrel.StatementBuilderType
 	Pool    *pgxpool.Pool
+	Log     *logger.Logger
 }
 
 // New -.
-func New(url string, opts ...Option) (*Postgres, error) {
+func New(url string, log *logger.Logger, opts ...Option) (*Postgres, error) {
 	pg := &Postgres{
 		maxPoolSize:  _defaultMaxPoolSize,
 		connAttempts: _defaultConnAttempts,
