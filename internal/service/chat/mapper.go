@@ -2,7 +2,7 @@ package chat
 
 import "errors"
 
-// setTemplate returns the template file string based on the chat type.
+// setTemplate returns the templates file string based on the chat type.
 func setTemplate(chatType string) string {
 	switch chatType {
 	case "recipe":

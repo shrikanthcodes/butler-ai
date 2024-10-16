@@ -17,8 +17,8 @@ import (
 	"google.golang.org/api/option"
 )
 
-// GeminiService handles interactions with Gemini AI.
-type GeminiService struct {
+// GsService handles interactions with Gemini AI.
+type GsService struct {
 	client      *genai.Client
 	model       *genai.GenerativeModel
 	chatSession *genai.ChatSession
@@ -26,8 +26,8 @@ type GeminiService struct {
 	mu          sync.Mutex // Mutex to protect shared resources.
 }
 
-// NewGeminiService creates a new instance of GeminiService with safety settings.
-func NewGeminiService(log *logger.Logger) (*GeminiService, error) {
+// NewGeminiService creates a new instance of GsService with safety settings.
+func NewGeminiService(log *logger.Logger) (*GsService, error) {
 
 	const ModelName = "gemini-1.5-flash"
 
@@ -64,7 +64,7 @@ func NewGeminiService(log *logger.Logger) (*GeminiService, error) {
 	}
 	chatSession := model.StartChat()
 
-	return &GeminiService{
+	return &GsService{
 		client:      client,
 		model:       model,
 		chatSession: chatSession,
@@ -72,27 +72,27 @@ func NewGeminiService(log *logger.Logger) (*GeminiService, error) {
 	}, nil
 }
 
-// Close gracefully shuts down the GeminiService.
-func (gs *GeminiService) Close() error {
+// Close gracefully shuts down the GsService.
+func (gs *GsService) Close() error {
 	return gs.client.Close()
 }
 
 // SetModelParameters sets the model parameters for the chat session.
-func (gs *GeminiService) SetModelParameters(maxTokens int32, temperature float32) *GeminiService {
+func (gs *GsService) SetModelParameters(maxTokens int32, temperature float32) *GsService {
 	gs.model.SetMaxOutputTokens(maxTokens)
 	gs.model.SetTemperature(temperature)
 	return gs
 }
 
 // SetSystemPrompt sets the system prompt for the chat session.
-func (gs *GeminiService) SetSystemPrompt(systemPrompt string) *GeminiService {
+func (gs *GsService) SetSystemPrompt(systemPrompt string) *GsService {
 	gs.model.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
 	return gs
 
 }
 
 // StartNewChat starts a new chat session without previous context.
-func (gs *GeminiService) StartNewChat(recentDialogues []entity.Dialogue) error {
+func (gs *GsService) StartNewChat(recentDialogues []entity.Dialogue) error {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
@@ -107,7 +107,7 @@ func (gs *GeminiService) StartNewChat(recentDialogues []entity.Dialogue) error {
 }
 
 // EndChat ends the current chat session.
-func (gs *GeminiService) EndChat() {
+func (gs *GsService) EndChat() {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
@@ -116,7 +116,7 @@ func (gs *GeminiService) EndChat() {
 }
 
 // appendDialogueToChatHistory adds a new dialogue to the chat session.
-func (gs *GeminiService) appendDialogueToChatHistory(role, content string) {
+func (gs *GsService) appendDialogueToChatHistory(role, content string) {
 	newContent := &genai.Content{
 		Parts: []genai.Part{
 			genai.Text(content),
@@ -127,7 +127,7 @@ func (gs *GeminiService) appendDialogueToChatHistory(role, content string) {
 }
 
 // PredictChat generates the next dialogue in a conversation.
-func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (string, error) {
+func (gs *GsService) PredictChat(ctx context.Context, userMessage string) (string, error) {
 	gs.mu.Lock()
 	defer gs.mu.Unlock()
 
@@ -144,9 +144,9 @@ func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (s
 		// Check if the error is a googleapi.Error and extract details.
 		var googleErr *googleapi.Error
 		if errors.As(err, &googleErr) {
-			log.Printf("Google API error: Code %d, Message: %s, Details: %v\n", googleErr.Code, googleErr.Message, googleErr.Body)
+			gs.log.Info("Google API error: Code %d, Message: %s, Details: %v\n", googleErr.Code, googleErr.Message, googleErr.Body)
 		} else {
-			log.Printf("Unexpected error: %v\n", err)
+			gs.log.Info("Unexpected error: %v\n", err)
 		}
 		return "", fmt.Errorf("prediction error: %w", err)
 	}
@@ -168,7 +168,7 @@ func (gs *GeminiService) PredictChat(ctx context.Context, userMessage string) (s
 }
 
 // Predict generates a one-shot response based on the provided text.
-func (gs *GeminiService) Predict(ctx context.Context, text string, maxTokens int32, temperature float32) (string, error) {
+func (gs *GsService) Predict(ctx context.Context, text string, maxTokens int32, temperature float32) (string, error) {
 	gs.mu.Lock()
 	gs.model.SetMaxOutputTokens(maxTokens)
 	gs.model.SetTemperature(temperature)
@@ -183,7 +183,7 @@ func (gs *GeminiService) Predict(ctx context.Context, text string, maxTokens int
 			break
 		}
 		if err != nil {
-			return "", fmt.Errorf("generation error: %w", err)
+			return "", fmt.Errorf("generation error %w", err)
 		}
 		// Extract text from response.
 		for _, candidate := range response.Candidates {

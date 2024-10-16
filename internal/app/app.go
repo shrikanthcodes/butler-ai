@@ -17,5 +17,5 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		log.Fatal("Failed to initialize services", err)
 	}
-	log.Info("Butler AI started successfully, listening on port ", cfg.HTTP.Port)
+	log.Info("Butler AI started successfully, listening on port: ", cfg.HTTP.Port)
 }

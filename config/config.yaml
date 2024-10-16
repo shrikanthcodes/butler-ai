@@ -12,7 +12,7 @@ logger:
 cors:
   allow_origins: 
     - 'http://localhost:3000'
-    - '*'  # for testing using POSTMAN
+    - 'http://localhost:3001'  # for testing using POSTMAN
   allow_methods: 
     - 'GET'
     - 'POST'
@@ -34,3 +34,10 @@ postgres:
 rabbitmq:
   rpc_server_exchange: 'rpc_server'
   rpc_client_exchange: 'rpc_client'
+
+redis:
+  host: 'localhost'
+  port: '6379'
+  password: ''  # Optional if your Redis setup doesn't use a password
+  db: 0         # Redis DB index (default is 0)
+  pool_max: 10  # Connection pool size

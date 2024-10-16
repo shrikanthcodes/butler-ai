@@ -1,80 +1,91 @@
 package db
 
 import (
+	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/shrikanthcodes/butler-ai/internal/entity"
+	"github.com/shrikanthcodes/butler-ai/pkg/postgres"
 )
 
-// CreateConversation inserts a new conversation into the db
-func (DBC *DBConnector) CreateConversation(conversation *entity.Conversation) error {
-	return DBC.db.Create(conversation).Error
-}
+// GetConversationByID fetches a conversation by its ID from the database.
+func GetConversationByID(ctx context.Context, pool *postgres.ConnPool, convID string) (*entity.Conversation, error) {
+	query := `
+        SELECT conv_id, user_id, chat_type, title, transcript, summary, is_active 
+        FROM conversations 
+        WHERE conv_id = $1
+    `
+	row := pool.QueryRow(ctx, query, convID)
 
-// UpdateConversationBatch updates an existing conversation in the db in table conversations given a convID
-func (DBC *DBConnector) UpdateConversationBatch(conversation *entity.Conversation) error {
-	return DBC.db.Save(conversation).Error
-}
-
-// UpdateConversation updates an existing conversation with low overhead in the db in table conversations given a convID
-
-// GetConversation retrieves a conversation from the db for a given convID from table conversations
-func (DBC *DBConnector) GetConversation(convID string) (entity.Conversation, error) {
-	var conversation entity.Conversation
-	if err := DBC.db.Where("conv_id = ?", convID).First(&conversation).Error; err != nil {
-		return entity.Conversation{}, err
-	}
-	return conversation, nil
-}
-
-// GetConversationsByUserID retrieves all conversations from the db for a given userID from table conversations
-func (DBC *DBConnector) GetConversationsByUserID(userID string) ([]entity.Conversation, error) {
-	var conversations []entity.Conversation
-	if err := DBC.db.Where("user_id = ?", userID).Find(&conversations).Error; err != nil {
+	var conv entity.Conversation
+	err := row.Scan(
+		&conv.ConvID, &conv.UserID, &conv.ChatType, &conv.Title,
+		&conv.Transcript, &conv.Summary, &conv.IsActive,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil // No conversation found, return nil
+		}
 		return nil, err
 	}
-	return conversations, nil
+
+	return &conv, nil
 }
 
-// DeleteConversation deletes a conversation from the db for a given convID from table conversations
-func (DBC *DBConnector) DeleteConversation(convID string) error {
-	return DBC.db.Where("conv_id = ?", convID).Delete(&entity.Conversation{}).Error
+// SaveOrUpdateConversation saves a new conversation or updates an existing one.
+func SaveOrUpdateConversation(ctx context.Context, pool *postgres.ConnPool, conv *entity.Conversation) error {
+	query := `
+        INSERT INTO conversations (conv_id, user_id, chat_type, title, transcript, summary, is_active) 
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (conv_id) DO UPDATE 
+        SET transcript = EXCLUDED.transcript, 
+            summary = EXCLUDED.summary, 
+            is_active = EXCLUDED.is_active
+    `
+	_, err := pool.Exec(ctx, query,
+		&conv.ConvID, &conv.UserID, &conv.ChatType, &conv.Title,
+		&conv.Transcript, &conv.Summary, &conv.IsActive,
+	)
+	return err
 }
 
-//ADMIN (Needs guardrails)
-
-// DeleteConversations deletes all conversations from the db for a given userID from table conversations
-func (DBC *DBConnector) DeleteConversations(userID string) error {
-	return DBC.db.Where("user_id = ?", userID).Delete(&entity.Conversation{}).Error
+// AppendTranscript updates dialogues to transcript in real time
+func AppendTranscript(ctx context.Context, pool *postgres.ConnPool, convId string, dialogue []entity.Dialogue) error {
+	query := `
+        UPDATE conversations 
+        SET transcript = COALESCE(transcript, '[]'::JSONB) || $1::JSONB 
+        WHERE conv_id = $2
+    `
+	_, err := pool.Exec(ctx, query,
+		dialogue, convId,
+	)
+	return err
 }
 
-// GetAllConversations retrieves all conversations from the db from table conversations
-func (DBC *DBConnector) GetAllConversations() ([]entity.Conversation, error) {
-	var conversations []entity.Conversation
-	if err := DBC.db.Find(&conversations).Error; err != nil {
+// GetConversationsByUser fetches all conversations for a specific user.
+func GetConversationsByUser(ctx context.Context, pool *postgres.ConnPool, userID string) ([]entity.Conversation, error) {
+	query := `
+        SELECT user_id, conv_id, is_active, chat_type, title 
+        FROM conversations 
+        WHERE user_id = $1
+    `
+	rows, err := pool.Query(ctx, query, userID)
+	if err != nil {
 		return nil, err
 	}
-	return conversations, nil
-}
+	defer rows.Close()
 
-// DeleteAllConversations deletes all conversations from the db from table conversations;
-func (DBC *DBConnector) DeleteAllConversations() error {
-	return DBC.db.Delete(&entity.Conversation{}).Error
-}
-
-// GetActiveConversations retrieves all active conversations from the db for a given userID from table conversations
-func (DBC *DBConnector) GetActiveConversations(userID string) ([]entity.Conversation, error) {
 	var conversations []entity.Conversation
-	if err := DBC.db.Where("user_id = ? AND is_active = true", userID).Find(&conversations).Error; err != nil {
-		return nil, err
+	for rows.Next() {
+		var conv entity.Conversation
+		if err := rows.Scan(
+			&conv.UserID, &conv.ConvID, &conv.IsActive,
+			&conv.ChatType, &conv.Title,
+		); err != nil {
+			return nil, err
+		}
+		conversations = append(conversations, conv)
 	}
+
 	return conversations, nil
-}
-
-// SetConversationActive sets a conversation to active
-func (DBC *DBConnector) SetConversationActive(convID string) error {
-	return DBC.db.Model(&entity.Conversation{}).Where("conv_id = ?", convID).Update("is_active", true).Error
-}
-
-// SetConversationInactive sets a conversation to inactive
-func (DBC *DBConnector) SetConversationInactive(convID string) error {
-	return DBC.db.Model(&entity.Conversation{}).Where("conv_id = ?", convID).Update("is_active", false).Error
 }

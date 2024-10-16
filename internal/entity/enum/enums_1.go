@@ -3,14 +3,14 @@ package enum
 type Genders int
 
 const (
-	Gender0 Genders = iota
-	Gender1
-	Gender2
-	Gender3
+	Genders0 Genders = iota
+	Genders1
+	Genders2
+	Genders3
 )
 
 func (g Genders) String() string {
-	if g < Gender0 || g > Gender3 {
+	if g < Genders0 || g > Genders3 {
 		return "Unknown"
 	}
 	return [...]string{"Unknown", "Male", "Female", "Non-Binary"}[g]
@@ -19,12 +19,12 @@ func (g Genders) String() string {
 type HeightUnits int
 
 const (
-	HeightUnit0 HeightUnits = iota
-	HeightUnit1
+	HeightUnits0 HeightUnits = iota
+	HeightUnits1
 )
 
 func (h HeightUnits) String() string {
-	if h < HeightUnit0 || h > HeightUnit1 {
+	if h < HeightUnits0 || h > HeightUnits1 {
 		return "Inches"
 	}
 	return [...]string{"Centimeters", "Inches"}[h]
@@ -33,12 +33,12 @@ func (h HeightUnits) String() string {
 type WeightUnits int
 
 const (
-	WeightUnit0 WeightUnits = iota
-	WeightUnit1
+	WeightUnits0 WeightUnits = iota
+	WeightUnits1
 )
 
 func (w WeightUnits) String() string {
-	if w < WeightUnit0 || w > WeightUnit1 {
+	if w < WeightUnits0 || w > WeightUnits1 {
 		return "Pounds"
 	}
 	return [...]string{"Kilograms", "Pounds"}[w]
@@ -47,13 +47,13 @@ func (w WeightUnits) String() string {
 type Lifestyles int
 
 const (
-	Lifestyle0 Lifestyles = iota
-	Lifestyle1
-	Lifestyle2
+	Lifestyles0 Lifestyles = iota
+	Lifestyles1
+	Lifestyles2
 )
 
 func (l Lifestyles) String() string {
-	if l < Lifestyle0 || l > Lifestyle2 {
+	if l < Lifestyles0 || l > Lifestyles2 {
 		return "Medium"
 	}
 	return [...]string{"Sedentary", "Average", "Active"}[l]
@@ -62,15 +62,15 @@ func (l Lifestyles) String() string {
 type ChatTypes int
 
 const (
-	ChatType0 ChatTypes = iota
-	ChatType1
-	ChatType2
-	ChatType3
-	ChatType4
+	ChatTypes0 ChatTypes = iota
+	ChatTypes1
+	ChatTypes2
+	ChatTypes3
+	ChatTypes4
 )
 
 func (c ChatTypes) String() string {
-	if c < ChatType0 || c > ChatType4 {
+	if c < ChatTypes0 || c > ChatTypes4 {
 		return "Unknown"
 	}
 	return [...]string{"Recipe", "Shopping", "Health", "Motivation", "Calorie Tracker"}[c]
@@ -79,21 +79,21 @@ func (c ChatTypes) String() string {
 type Cuisines int
 
 const (
-	Cuisine0 Cuisines = iota
-	Cuisine1
-	Cuisine2
-	Cuisine3
-	Cuisine4
-	Cuisine5
-	Cuisine6
-	Cuisine7
-	Cuisine8
-	Cuisine9
-	Cuisine10
+	Cuisines0 Cuisines = iota
+	Cuisines1
+	Cuisines2
+	Cuisines3
+	Cuisines4
+	Cuisines5
+	Cuisines6
+	Cuisines7
+	Cuisines8
+	Cuisines9
+	Cuisines10
 )
 
 func (c Cuisines) String() string {
-	if c < Cuisine0 || c > Cuisine10 {
+	if c < Cuisines0 || c > Cuisines10 {
 		return "Unknown"
 	}
 	return [...]string{"African", "American", "Chinese", "French", "Indian", "Italian", "Japanese", "Mexican", "Thai", "Filipino", "Asian"}[c]
@@ -102,19 +102,19 @@ func (c Cuisines) String() string {
 type Currencies int
 
 const (
-	Currency0 Currencies = iota
-	Currency1
-	Currency2
-	Currency3
-	Currency4
-	Currency5
-	Currency6
-	Currency7
-	Currency8
+	Currencies0 Currencies = iota
+	Currencies1
+	Currencies2
+	Currencies3
+	Currencies4
+	Currencies5
+	Currencies6
+	Currencies7
+	Currencies8
 )
 
 func (c Currencies) String() string {
-	if c < Currency0 || c > Currency8 {
+	if c < Currencies0 || c > Currencies8 {
 		return "USD"
 	}
 	return [...]string{"USD", "EUR", "GBP", "JPY", "CNY", "INR", "MXN", "THB", "PHP"}[c]
@@ -123,15 +123,15 @@ func (c Currencies) String() string {
 type TimeUnits int
 
 const (
-	TimeUnit0 TimeUnits = iota
-	TimeUnit1
-	TimeUnit2
-	TimeUnit3
-	TimeUnit4
+	TimeUnits0 TimeUnits = iota
+	TimeUnits1
+	TimeUnits2
+	TimeUnits3
+	TimeUnits4
 )
 
 func (t TimeUnits) String() string {
-	if t < TimeUnit0 || t > TimeUnit4 {
+	if t < TimeUnits0 || t > TimeUnits4 {
 		return "Unknown"
 	}
 	return [...]string{"Seconds", "Minutes", "Hours", "Days", "Weeks"}[t]
@@ -140,26 +140,26 @@ func (t TimeUnits) String() string {
 type RecipeTags int
 
 const (
-	RecipeTag0 RecipeTags = iota
-	RecipeTag1
-	RecipeTag2
-	RecipeTag3
-	RecipeTag4
-	RecipeTag5
-	RecipeTag6
-	RecipeTag7
-	RecipeTag8
-	RecipeTag9
-	RecipeTag10
-	RecipeTag11
-	RecipeTag12
-	RecipeTag13
-	RecipeTag14
-	RecipeTag15
+	RecipeTags0 RecipeTags = iota
+	RecipeTags1
+	RecipeTags2
+	RecipeTags3
+	RecipeTags4
+	RecipeTags5
+	RecipeTags6
+	RecipeTags7
+	RecipeTags8
+	RecipeTags9
+	RecipeTags10
+	RecipeTags11
+	RecipeTags12
+	RecipeTags13
+	RecipeTags14
+	RecipeTags15
 )
 
 func (r RecipeTags) String() string {
-	if r < RecipeTag0 || r > RecipeTag15 {
+	if r < RecipeTags0 || r > RecipeTags15 {
 		return "Unknown"
 	}
 	return [...]string{"Main Course", "Side Dish", "Dessert", "Appetizer", "Salad", "Bread", "Breakfast", "Soup", "Beverage", "Sauce", "Marinade", "Preserves", "Spice Mix", "Dinner", "Lunch", "Snack"}[r]
@@ -168,14 +168,14 @@ func (r RecipeTags) String() string {
 type ShoppingTypes int
 
 const (
-	ShoppingType0 ShoppingTypes = iota
-	ShoppingType1
-	ShoppingType2
-	ShoppingType3
+	ShoppingTypes0 ShoppingTypes = iota
+	ShoppingTypes1
+	ShoppingTypes2
+	ShoppingTypes3
 )
 
 func (s ShoppingTypes) String() string {
-	if s < ShoppingType0 || s > ShoppingType3 {
+	if s < ShoppingTypes0 || s > ShoppingTypes3 {
 		return "Unknown"
 	}
 	return [...]string{"Online", "In-person", "Delivery", "Pickup"}[s]

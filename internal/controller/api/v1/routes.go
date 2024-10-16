@@ -21,3 +21,13 @@ func RegisterRoutes(port int, corsConfig config.CORS, log *logger.Logger) (*gin.
 	//}
 	return nil, nil
 }
+
+// Close closes the gin server
+func Close() error {
+	// Close the gin server
+	//err := ginServer.Close()
+	//if err != nil {
+	//	return err
+	//}
+	return nil
+}
