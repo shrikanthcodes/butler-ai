@@ -61,3 +61,14 @@ func (s *DbService) SaveConversation(ctx context.Context, conv *entity.Conversat
 func (s *DbService) GetConversationsByUser(ctx context.Context, userID string) ([]entity.Conversation, error) {
 	return db.GetConversationsByUser(ctx, s.conn, userID)
 }
+
+func (s *DbService) GetRecentDialogues(ctx context.Context, convID string) []entity.Dialogue {
+	var recent []entity.Dialogue
+	//TODO: check if conversation exists in cache
+	recent, err := db.GetNRecentDialogues(ctx, s.conn, convID, 10)
+	if err != nil {
+		s.log.Error("Failed to get recent dialogues", err)
+		return nil
+	}
+	return recent
+}

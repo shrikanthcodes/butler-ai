@@ -62,6 +62,32 @@ func AppendTranscript(ctx context.Context, pool *postgres.ConnPool, convId strin
 	return err
 }
 
+// GetNRecentDialogues gets n most recent dialogues from a chat given convID
+func GetNRecentDialogues(ctx context.Context, pool *postgres.ConnPool, convID string, n int) ([]entity.Dialogue, error) {
+	query := `
+		SELECT jsonb_agg(dialogue)
+		FROM (
+			SELECT transcript -> ord AS dialogue
+			FROM generate_series(
+				jsonb_array_length(transcript) - $1, 
+				jsonb_array_length(transcript)
+			) AS ord
+			WHERE conv_id = $2
+		) subquery;
+	`
+	row := pool.QueryRow(ctx, query, n, convID)
+
+	var dialogue []entity.Dialogue
+	err := row.Scan(&dialogue)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return dialogue, nil
+}
+
 // GetConversationsByUser fetches all conversations for a specific user.
 func GetConversationsByUser(ctx context.Context, pool *postgres.ConnPool, userID string) ([]entity.Conversation, error) {
 	query := `

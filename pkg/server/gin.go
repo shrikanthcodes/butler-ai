@@ -8,9 +8,7 @@ import (
 
 // Server is a struct that represents a Gin server
 type Server struct {
-	Port int
-
-	Router *gin.Engine
+	*gin.Engine
 }
 
 // New creates a new instance of GinServer
@@ -29,7 +27,6 @@ func New(port int, corsConfig config.CORS) (*Server, error) {
 	router.Use(gin.Logger())
 
 	return &Server{
-		Port:   port,
-		Router: router,
+		router,
 	}, nil
 }

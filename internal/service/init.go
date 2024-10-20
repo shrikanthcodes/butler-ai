@@ -2,11 +2,12 @@ package service
 
 import (
 	"github.com/shrikanthcodes/butler-ai/config"
-	"github.com/shrikanthcodes/butler-ai/internal/controller/api/v1"
+	v1 "github.com/shrikanthcodes/butler-ai/internal/controller/api/v1"
+	"github.com/shrikanthcodes/butler-ai/internal/service/cache"
 	"github.com/shrikanthcodes/butler-ai/internal/service/chat"
 	"github.com/shrikanthcodes/butler-ai/internal/service/database"
 	"github.com/shrikanthcodes/butler-ai/internal/service/llm"
-	"github.com/shrikanthcodes/butler-ai/internal/service/repository"
+	"github.com/shrikanthcodes/butler-ai/internal/service/queue"
 	"github.com/shrikanthcodes/butler-ai/internal/service/templates"
 	"github.com/shrikanthcodes/butler-ai/pkg/logger"
 )
@@ -32,14 +33,26 @@ func Start(cfg *config.Config, log *logger.Logger) error {
 	checkError("DatabaseService", err, log)
 	defer deferClose("DatabaseService", databaseService.Close, log)
 
+	// Initialize CacheService
+	cacheService, err := cache.NewCacheService(cfg.Redis, log)
+	checkError("CacheService", err, log)
+	defer deferClose("RepositoryService", cacheService.Close, log)
+
 	// Initialize RepositoryService
-	repositoryService, err := repository.NewRepositoryService(cfg.Redis, log)
-	checkError("RepositoryService", err, log)
-	defer deferClose("RepositoryService", repositoryService.Close, log)
+	queueService, err := queue.NewQueueService(cfg.RabbitMQ, log)
+	checkError("QueueService", err, log)
+	defer deferClose("QueueService", queueService.Close, log)
 
 	// Initialize ChatService
-	_, err = chat.NewChatService(geminiService, templateService,
-		databaseService, repositoryService, log)
+	csBuilder := &chat.CsService{
+		GeminiService:   geminiService,
+		DatabaseService: databaseService,
+		CacheService:    cacheService,
+		TemplateService: templateService,
+		QueueService:    queueService,
+		Log:             log,
+	}
+	_, err = chat.NewChatService(csBuilder)
 	checkError("ChatService", err, log)
 
 	if err != nil {

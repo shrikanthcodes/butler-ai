@@ -29,7 +29,7 @@ postgres:
   password: 'butlerai123*'
   dbname: 'butlerdb'
   sslmode: 'disable'
-  pool_max: 2
+  pool_max: 10
 
 rabbitmq:
   rpc_server_exchange: 'rpc_server'
@@ -38,6 +38,6 @@ rabbitmq:
 redis:
   host: 'localhost'
   port: '6379'
-  password: ''  # Optional if your Redis setup doesn't use a password
-  db: 0         # Redis DB index (default is 0)
-  pool_max: 10  # Connection pool size
+  password: 'butlerai123*'
+  db: 2
+  pool_max: 10

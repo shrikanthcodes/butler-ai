@@ -14,7 +14,7 @@ type (
 		CORS     CORS  `yaml:"cors"`
 		Postgres PG    `yaml:"postgres"`
 		RabbitMQ RMQ   `yaml:"rabbitmq"`
-		Redis    Redis `yaml:"repository"`
+		Redis    Redis `yaml:"cache"`
 	}
 
 	// App holds application-specific settings.
