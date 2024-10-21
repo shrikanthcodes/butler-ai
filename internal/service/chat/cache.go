@@ -1,146 +1,56 @@
-package cache
+package chat
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/redis/go-redis/v9"
-	"github.com/shrikanthcodes/butler-ai/config"
 	"github.com/shrikanthcodes/butler-ai/internal/entity"
-	"github.com/shrikanthcodes/butler-ai/pkg/logger"
-	"github.com/shrikanthcodes/butler-ai/pkg/repository"
-	"sync"
+	"github.com/shrikanthcodes/butler-ai/internal/service/cache"
 	"time"
 )
 
-// CsCache defines the in-memory cache backed by Redis.
-type CsCache struct {
-	ActiveConversations sync.Map // map[string]*entity.Conversation
-	RecentDialogues     sync.Map // map[string][]entity.Dialogue
-	Prompt              sync.Map // map[string][]string
-	ConvLocks           sync.Map // map[string]*sync.RWMutex
-	LastUpdated         sync.Map // map[string]time.Time
-}
-
-func initializeCsCache() *CsCache {
-	return &CsCache{
-		ActiveConversations: sync.Map{},
-		RecentDialogues:     sync.Map{},
-		Prompt:              sync.Map{},
-		ConvLocks:           sync.Map{},
-		LastUpdated:         sync.Map{},
-	}
-}
-
-// UsCache defines the in-memory cache backed by Redis.
-type UsCache struct {
-	UserBasic      sync.Map // map[string]entity.User
-	UserMedical    sync.Map // map[string]entity.Medical
-	UserProfile    sync.Map // map[string]entity.Profile
-	UserDiet       sync.Map // map[string]entity.Diet
-	UserInventory  sync.Map // map[string]entity.Inventory
-	UserShopping   sync.Map // map[string]entity.Shopping
-	UserGoal       sync.Map // map[string]entity.Goal
-	UserMealChoice sync.Map // map[string]entity.MealChoice
-	UserLocks      sync.Map // map[string]*sync.RWMutex
-	LastUpdated    sync.Map // map[string]time.Time
-}
-
-func initializeUsCache() *UsCache {
-	return &UsCache{
-		UserBasic:      sync.Map{},
-		UserMedical:    sync.Map{},
-		UserProfile:    sync.Map{},
-		UserDiet:       sync.Map{},
-		UserInventory:  sync.Map{},
-		UserShopping:   sync.Map{},
-		UserGoal:       sync.Map{},
-		UserMealChoice: sync.Map{},
-		UserLocks:      sync.Map{},
-		LastUpdated:    sync.Map{},
-	}
-}
-
-type CcService struct {
-	CsCache     *CsCache
-	UsCache     *UsCache
-	redisClient *repository.ConnPool
-	ctx         context.Context
-}
-
-// NewCacheService initializes the CsCache with Redis as the backend.
-func NewCacheService(conf config.Redis, log logger.Logger) *CcService {
-	redisClient, err := repository.New(conf, log)
-	if err != nil {
-		log.Error("Cache service could not be initialized")
-	}
-	return &CcService{
-		CsCache:     initializeCsCache(),
-		UsCache:     initializeUsCache(),
-		redisClient: redisClient,
-		ctx:         context.Background(),
-	}
-}
-
-type RWMutex struct {
-	sync.RWMutex
-}
-
 // GetConvLock returns the mutex for a specific convID, creating it if necessary.
-func (cache *CcService) GetConvLock(convID string) *sync.RWMutex {
-	if val, ok := cache.CsCache.ConvLocks.Load(convID); ok {
-		return val.(*sync.RWMutex)
+func (cs *CsService) GetConvLock(convID string) *cache.RWMutex {
+	if val, ok := cs.CacheService.CsCache.ConvLocks.Load(convID); ok {
+		return val.(*cache.RWMutex)
 	}
-	// If the mutex doesn't exist, create it
-	newLock := &sync.RWMutex{}
-	cache.CsCache.ConvLocks.Store(convID, newLock)
+	newLock := &cache.RWMutex{}
+	cs.CacheService.CsCache.ConvLocks.Store(convID, newLock)
 	return newLock
 }
 
-//// GetUserLock returns the mutex for a specific convID, creating it if necessary.
-//func (cache *CcService) GetUserLock(userID string) *sync.RWMutex {
-//	if val, ok := cache.UsCache.UserLocks.Load(userID); ok {
-//		return val.(*sync.RWMutex)
-//	}
-//	// If the mutex doesn't exist, create it
-//	newLock := &sync.RWMutex{}
-//	cache.UsCache.UserLocks.Store(userID, newLock)
-//	return newLock
-//}
-
 // AddDialogue adds a new dialogue and stores it both in-memory and in Redis.
-func (cache *CcService) AddDialogue(convID string, newDialogue entity.Dialogue, newConversation *entity.Conversation) error {
-	convLock := cache.GetConvLock(convID)
+func (cs *CsService) AddDialogue(convID string, newDialogue entity.Dialogue, newConversation *entity.Conversation) error {
+	convLock := cs.GetConvLock(convID)
 	convLock.Lock()
 	defer convLock.Unlock()
 
 	// Update in-memory active conversations
-	cache.CsCache.ActiveConversations.Store(convID, newConversation)
+	cs.CacheService.CsCache.ActiveConversations.Store(convID, newConversation)
 
 	// Update recent dialogues (limit to 10)
 	var dialogues []entity.Dialogue
-	if val, ok := cache.CsCache.RecentDialogues.Load(convID); ok {
+	if val, ok := cs.CacheService.CsCache.RecentDialogues.Load(convID); ok {
 		dialogues = val.([]entity.Dialogue)
 	}
 	dialogues = append(dialogues, newDialogue)
 	if len(dialogues) > 10 {
 		dialogues = dialogues[len(dialogues)-10:]
 	}
-	cache.CsCache.RecentDialogues.Store(convID, dialogues)
+	cs.CacheService.CsCache.RecentDialogues.Store(convID, dialogues)
 
 	// Update Redis
-	err := cache.storeInRedis(convID, newConversation, dialogues)
+	err := cs.StoreInRedis(convID, newConversation, dialogues)
 	if err != nil {
 		return err
 	}
 
 	// Update lastUpdated in-memory
-	cache.CsCache.LastUpdated.Store(convID, time.Now())
+	cs.CacheService.CsCache.LastUpdated.Store(convID, time.Now())
 
 	return nil
 }
 
-// storeInRedis persists both active conversation and recent dialogues in Redis.
-func (cache *CcService) storeInRedis(convID string, conversation *entity.Conversation, dialogues []entity.Dialogue) error {
+// StoreInRedis persists both active conversation and recent dialogues in Redis.
+func (cs *CsService) StoreInRedis(convID string, conversation *entity.Conversation, dialogues []entity.Dialogue) error {
 	// Convert data to JSON
 	conversationJSON, err := json.Marshal(conversation)
 	if err != nil {
